@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Pixels and tensors: decoding, encoding, tiling with overlap and the conversion to and from
+       normalized NCHW floats. No UI type and no ONNX Runtime type, so it is testable on its own. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Revelei.Imaging</RootNamespace>
+    <!-- WIC's CopyPixels writes straight into the image's sample array. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WIC, which Vortice ships inside its Direct2D package; only Vortice.WIC is used here. -->
+    <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
+    <!-- WebP export only (PB25): WIC has no WebP encoder. MIT. -->
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- PhotoBoost's mark: a photo split by the comparison divider, coarse pixels before it and the
+  <!-- Revelei's mark: a photo split by the comparison divider, coarse pixels before it and the
        smooth scene after it, on the warm tone's clay tile. Drawn on a 512 grid with shapes large
        enough to survive 16 px: the tile, the frame, one mountain, one sun, the divider. -->
   <defs>

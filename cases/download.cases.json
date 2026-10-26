@@ -1,6 +1,6 @@
 {
   // PB59: a first-use download watched from the offer to the run, against the fixture server
-  // CasesRun starts on 127.0.0.1:47623 (tests/PhotoBoost.Cases/FixtureServer.cs). It sends a
+  // CasesRun starts on 127.0.0.1:47623 (tests/Revelei.Cases/FixtureServer.cs). It sends a
   // 770 KB stand-in RMBG-1.4 at 40 KB/s, about 20 s, long enough to read its progress and pause it,
   // and a resumed one at full speed, so the rest and the run fit in one step's wait. --manifest names the stand-in's manifest; the photo's own
   // models folder is staged empty, so Remove background has something to download.
@@ -181,7 +181,7 @@
           "locator": "Text#BackgroundFirstUseDetail",
           "act": "read",
           "reads": "name",
-          "expect": "The download server no longer has this file (error 404). Update PhotoBoost, which knows the current download locations, then try again.",
+          "expect": "The download server no longer has this file (error 404). Update Revelei, which knows the current download locations, then try again.",
           "named": "what happened and what to do"
         },
         {

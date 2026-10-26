@@ -1,9 +1,9 @@
 {
-  "name": "photo-boost-site",
+  "name": "revelei-site",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "The public site for PhotoBoost: copy in one module, the page shows real results made by the app.",
+  "description": "The public site for Revelei: copy in one module, the page shows real results made by the app.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",

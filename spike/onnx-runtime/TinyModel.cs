@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using System.Text;
 
-namespace PhotoBoost.Spike.OnnxRuntime;
+namespace Revelei.Spike.OnnxRuntime;
 
 /// <summary>
 /// A Real-ESRGAN-shaped ONNX model written as protobuf bytes, so the spike needs no model file and
@@ -34,7 +34,7 @@ internal static class TinyModel
 
         Proto model = new();
         model.Int(1, 8);
-        model.String(2, "photoboost-spike");
+        model.String(2, "revelei-spike");
         model.Message(7, graph);
         model.Message(8, opset);
         return model.ToArray();

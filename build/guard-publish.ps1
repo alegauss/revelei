@@ -3,12 +3,12 @@
     Refuse the publish when something is running from the folder it is about to overwrite.
 
 .DESCRIPTION
-    After claude-tray's guard (T266 there). `dotnet publish` writes PhotoBoost.exe and its natives
+    After claude-tray's guard (T266 there). `dotnet publish` writes Revelei.exe and its natives
     into artifacts\publish. If a process is running from that folder - the app started from the
     last publish to try it - the SDK fails inside its bundler with an UnauthorizedAccessException
     and a stack trace about MSBuild, for a state that is not a bug. This names it instead.
 
-    It matches on the PATH, not on the process name: a PhotoBoost running from bin\Debug, or
+    It matches on the PATH, not on the process name: a Revelei running from bin\Debug, or
     installed under %LocalAppData%\Programs, is not in the way.
 
     It does NOT stop the process: that is the user's running app, and a build script that kills

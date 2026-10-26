@@ -2,9 +2,9 @@
   // PB38: what is true of this project rather than of any one case, for winwright. Every relative
   // path resolves against this file's directory, so a case carries no path and runs on any checkout.
 
-  // The app's output under its RID: PhotoBoost.App sets win-x64 unconditionally. {configuration}
+  // The app's output under its RID: Revelei.App sets win-x64 unconditionally. {configuration}
   // is the build under test (WW521): CasesRun passes its own, and Debug is what run-tests.cmd builds.
-  "executable": "src/PhotoBoost.App/bin/{configuration}/net10.0-windows10.0.19041.0/win-x64/PhotoBoost.exe",
+  "executable": "src/Revelei.App/bin/{configuration}/net10.0-windows10.0.19041.0/win-x64/Revelei.exe",
   "configuration": "Debug",
 
   "sourceRoot": "src",

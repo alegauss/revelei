@@ -200,7 +200,7 @@ class ExportTests(unittest.TestCase):
             self.assertEqual((committed / file).read_bytes(), (self.folder / file).read_bytes(), file)
 
     def test_yunet_heads_decode_as_opencv_does(self):
-        # PB30: the same anchor PhotoBoost.Inference's FaceDetectionTests decodes, so both sides agree.
+        # PB30: the same anchor Revelei.Inference's FaceDetectionTests decodes, so both sides agree.
         heads = {}
         for stride in self.ex.DETECTOR_STRIDES:
             n = (self.ex.DETECTOR_SIZE // stride) ** 2

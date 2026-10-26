@@ -1,0 +1,22 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Revelei.App/Revelei.App.csproj" />
+    <Project Path="src/Revelei.Imaging/Revelei.Imaging.csproj" />
+    <Project Path="src/Revelei.Inference/Revelei.Inference.csproj" />
+    <Project Path="src/Revelei.Render/Revelei.Render.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Revelei.App.Tests/Revelei.App.Tests.csproj" />
+    <Project Path="tests/Revelei.Architecture.Tests/Revelei.Architecture.Tests.csproj" />
+    <Project Path="tests/Revelei.Cases/Revelei.Cases.csproj" />
+    <Project Path="tests/Revelei.Imaging.Tests/Revelei.Imaging.Tests.csproj" />
+    <Project Path="tests/Revelei.Inference.Tests/Revelei.Inference.Tests.csproj" />
+    <Project Path="tests/Revelei.Render.Tests/Revelei.Render.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Revelei.Bench/Revelei.Bench.csproj" />
+  </Folder>
+</Solution>

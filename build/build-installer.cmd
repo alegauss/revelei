@@ -1,5 +1,5 @@
 @echo off
-rem PB35: publishes PhotoBoost self-contained and builds its per-user installer with Inno Setup.
+rem PB35: publishes Revelei self-contained and builds its per-user installer with Inno Setup.
 rem
 rem   build\build-installer.cmd
 rem
@@ -9,8 +9,8 @@ rem    extracted at start: a single-file publish of native ONNX Runtime binaries
 rem    breaks, and the PB5 spike ran DirectML both ways.
 rem 2. The packages' own license and notice files into artifacts\publish\licenses.
 rem 3. PB51: the FP16 model set from .cache\models into artifacts\publish\models (stage-models.ps1),
-rem    which the app reads before %LOCALAPPDATA%\PhotoBoost\models. A missing model fails the build.
-rem 4. ISCC compiles build\installer.iss into artifacts\installer\PhotoBoost-Setup-<version>.exe.
+rem    which the app reads before %LOCALAPPDATA%\Revelei\models. A missing model fails the build.
+rem 4. ISCC compiles build\installer.iss into artifacts\installer\Revelei-Setup-<version>.exe.
 setlocal
 
 cd /d "%~dp0.."
@@ -25,8 +25,8 @@ if errorlevel 1 exit /b 1
 if exist "%PUBLISH%" rd /s /q "%PUBLISH%"
 if exist "%CD%\artifacts\installer" rd /s /q "%CD%\artifacts\installer"
 
-echo === Publishing PhotoBoost (Release, win-x64, self-contained) ===
-dotnet publish src\PhotoBoost.App\PhotoBoost.App.csproj --configuration Release --runtime win-x64 ^
+echo === Publishing Revelei (Release, win-x64, self-contained) ===
+dotnet publish src\Revelei.App\Revelei.App.csproj --configuration Release --runtime win-x64 ^
     --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true ^
     -p:IncludeNativeLibrariesForSelfExtract=false -p:DebugType=none --output "%PUBLISH%" --nologo
 if errorlevel 1 (
@@ -69,5 +69,5 @@ if errorlevel 1 (
     exit /b 1
 )
 
-for %%F in ("%CD%\artifacts\installer\PhotoBoost-Setup-*.exe") do echo Installer: %%F
+for %%F in ("%CD%\artifacts\installer\Revelei-Setup-*.exe") do echo Installer: %%F
 endlocal

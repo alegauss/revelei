@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem Builds PhotoBoost (Debug) and starts it, to try the app by hand.
+rem Builds Revelei (Debug) and starts it, to try the app by hand.
 rem
 rem   .\run.cmd                  a menu of manual test scenarios, each on a test image
 rem   .\run.cmd [app options]    starts the app straight away with those options, e.g.
@@ -11,14 +11,14 @@ rem Call it as .\run.cmd: with NoDefaultCurrentDirectoryInExePath set, a bare "r
 rem another run.cmd on the PATH (nvm ships one) before this one.
 rem
 rem The models export-and-quantize.py left in .cache\models are used unless --models is given;
-rem without that folder the app falls back to %LOCALAPPDATA%\PhotoBoost\models. The real test
+rem without that folder the app falls back to %LOCALAPPDATA%\Revelei\models. The real test
 rem images come with scripts\download_models.py (.cache\weights\test-images); the fixtures are
 rem committed (tests\fixtures\images). App options: docs\COMMAND-LINE.md.
 
 pushd "%~dp0"
 
-echo Building PhotoBoost (Debug)
-dotnet build src\PhotoBoost.App\PhotoBoost.App.csproj --configuration Debug --nologo -v quiet -nodeReuse:false
+echo Building Revelei (Debug)
+dotnet build src\Revelei.App\Revelei.App.csproj --configuration Debug --nologo -v quiet -nodeReuse:false
 if errorlevel 1 (
     echo.
     echo BUILD FAILED - the app was not started.
@@ -26,7 +26,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-set "EXE=%CD%\src\PhotoBoost.App\bin\Debug\net10.0-windows10.0.19041.0\win-x64\PhotoBoost.exe"
+set "EXE=%CD%\src\Revelei.App\bin\Debug\net10.0-windows10.0.19041.0\win-x64\Revelei.exe"
 set "REAL=.cache\weights\test-images"
 set "FIX=tests\fixtures\images"
 set "OWN_MODELS="
@@ -40,7 +40,7 @@ set "EXPORT=off"
 
 :menu
 cls
-echo  PhotoBoost - manual test scenarios
+echo  Revelei - manual test scenarios
 echo  ==================================
 echo.
 echo  Real models (scripts\download_models.py and export-and-quantize.py)
@@ -126,8 +126,8 @@ rem --export never overwrites, so each run gets a fresh name under artifacts\man
 if /i "!EXPORT!"=="on" if defined IMG if not exist "artifacts\manual" mkdir "artifacts\manual"
 if /i "!EXPORT!"=="on" if defined IMG set ARGS=!ARGS! --export "artifacts\manual\result-!RANDOM!!RANDOM!.png"
 echo.
-echo  Starting: PhotoBoost.exe !ARGS!
-start "PhotoBoost" "%EXE%" !ARGS!
+echo  Starting: Revelei.exe !ARGS!
+start "Revelei" "%EXE%" !ARGS!
 timeout /t 2 >nul 2>&1
 goto :menu
 
@@ -148,7 +148,7 @@ set "MODELS_ARG="
 echo %* | findstr /i /c:"--models" >nul
 if errorlevel 1 if defined OWN_MODELS set "MODELS_ARG=--models !OWN_MODELS!"
 echo Starting %EXE% !MODELS_ARG! %*
-start "PhotoBoost" "%EXE%" !MODELS_ARG! %*
+start "Revelei" "%EXE%" !MODELS_ARG! %*
 
 :done
 popd

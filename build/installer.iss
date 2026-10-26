@@ -1,10 +1,10 @@
 ; PB35: the per-user installer, after claude-tray's. Built by build\build-installer.cmd, which
 ; publishes first. Every relative path is resolved against this file's folder (build\).
-; Output: artifacts\installer\PhotoBoost-Setup-<version>.exe
+; Output: artifacts\installer\Revelei-Setup-<version>.exe
 
-#define MyAppName "PhotoBoost"
+#define MyAppName "Revelei"
 #define MyAppPublisher "Alexandre Oliveira"
-#define MyAppExeName "PhotoBoost.exe"
+#define MyAppExeName "Revelei.exe"
 #define MyPublishDir "..\artifacts\publish"
 ; Read from the published exe, whose version comes from Directory.Build.props: one place to bump.
 #define MyAppVersion GetStringFileInfo(MyPublishDir + "\" + MyAppExeName, PRODUCT_VERSION)
@@ -16,14 +16,14 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 ; Per user, no administrator: models download into the user's own folder anyway.
 PrivilegesRequired=lowest
-DefaultDirName={localappdata}\Programs\PhotoBoost
+DefaultDirName={localappdata}\Programs\Revelei
 DisableProgramGroupPage=yes
 DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
-; The app's own icon on the setup wizard and its .exe (src/PhotoBoost.App/PhotoBoost.ico).
-SetupIconFile=..\src\PhotoBoost.App\PhotoBoost.ico
+; The app's own icon on the setup wizard and its .exe (src/Revelei.App/Revelei.ico).
+SetupIconFile=..\src\Revelei.App\Revelei.ico
 OutputDir=..\artifacts\installer
-OutputBaseFilename=PhotoBoost-Setup-{#MyAppVersion}
+OutputBaseFilename=Revelei-Setup-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -48,6 +48,15 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; the models folder (PB51) is stage-models.ps1's FP16 set, which the app reads before its own.
 Source: "{#MyPublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs; \
     Excludes: "*.pdb,DirectML.Debug.dll,*.lib,*.xml"
+
+[InstallDelete]
+; Up to 0.3.0 the app was PhotoBoost. The AppId is unchanged, so an upgrade lands in the old
+; folder and Start menu group; the old exe and shortcuts would otherwise stay behind, pointing nowhere.
+Type: files; Name: "{app}\PhotoBoost.exe"
+Type: files; Name: "{group}\PhotoBoost.lnk"
+Type: files; Name: "{group}\Uninstall PhotoBoost.lnk"
+Type: files; Name: "{group}\Desinstalar PhotoBoost.lnk"
+Type: files; Name: "{autodesktop}\PhotoBoost.lnk"
 
 [UninstallDelete]
 ; PB58: an upgrade from 0.1.0 keeps the GFPGAN, RMBG and ViTMatte it bundled, which this

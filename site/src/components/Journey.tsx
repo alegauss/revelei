@@ -3,7 +3,7 @@ import { asset } from "../content";
 import { useWords } from "../i18n";
 
 // The path a photo takes through the app, as four small scenes of the window rather than four
-// paragraphs: a reader who has never opened PhotoBoost should finish this section knowing where
+// paragraphs: a reader who has never opened Revelei should finish this section knowing where
 // to drop a file and where the result appears. Each scene loops gently and stops for readers
 // who ask for reduced motion (index.css).
 

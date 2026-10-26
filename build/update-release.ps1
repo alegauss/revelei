@@ -1,11 +1,11 @@
 # =============================================================================
-# update-release.ps1 - Sets PhotoBoost's version number in one step.
+# update-release.ps1 - Sets Revelei's version number in one step.
 # After claude-tray's update-release.ps1.
 #
 # Updates the two places that carry the version, which a test keeps equal
-# (tests\PhotoBoost.Architecture.Tests\VersionTests.cs):
+# (tests\Revelei.Architecture.Tests\VersionTests.cs):
 #   - Directory.Build.props            -> <Version>x.y.z</Version>
-#   - src\PhotoBoost.App\app.manifest  -> assemblyIdentity version="x.y.z.0"
+#   - src\Revelei.App\app.manifest  -> assemblyIdentity version="x.y.z.0"
 # The installer reads the version from the published exe, so there is no third place.
 #
 # Usage:  build\update-release.cmd 0.1.0
@@ -39,7 +39,7 @@ Write-Utf8 $propsPath $props
 Write-Host "Directory.Build.props: $old -> $Version"
 
 # --- 2) app.manifest: assemblyIdentity version (x.y.z.0) ---------------------
-$manifestPath = Join-Path $root 'src\PhotoBoost.App\app.manifest'
+$manifestPath = Join-Path $root 'src\Revelei.App\app.manifest'
 $manifest = Read-Utf8 $manifestPath
 $pattern = '(<assemblyIdentity\s+version=")[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(")'
 if ($manifest -notmatch $pattern) {

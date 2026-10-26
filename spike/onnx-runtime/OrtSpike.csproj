@@ -5,7 +5,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <RootNamespace>PhotoBoost.Spike.OnnxRuntime</RootNamespace>
+    <RootNamespace>Revelei.Spike.OnnxRuntime</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <Flavor Condition="'$(Flavor)' == ''">DirectML</Flavor>

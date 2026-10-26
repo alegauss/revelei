@@ -15,9 +15,9 @@
 # ┌─────────────────────────────────────────────────────────────────────────────────────┐
 # │ ONE-TIME REPOSITORY SETTING — the deploy is inert until it is changed:               │
 # │   Settings → Pages → Build and deployment → Source: "GitHub Actions"                 │
-# │ The site is served at japode.com/photo-boost/ (and /photo-boost/pt/), which Pages    │
+# │ The site is served at japode.com/revelei/ (and /revelei/pt/), which Pages    │
 # │ derives from the repository name; vite.config.ts and src/content.ts carry the        │
-# │ same /photo-boost/ base.                                                              │
+# │ same /revelei/ base.                                                              │
 # └─────────────────────────────────────────────────────────────────────────────────────┘
 
 name: site

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Reads the project files and the solution rather than referencing the assemblies, so a rule
+       broken in a .csproj fails here even when the code behind it still compiles. -->
+  <PropertyGroup>
+    <RootNamespace>Revelei.Architecture.Tests</RootNamespace>
+  </PropertyGroup>
+
+</Project>

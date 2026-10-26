@@ -2,7 +2,7 @@
 //
 // prerenderSite writes the rendered page into dist/index.html, patching the <head> by
 // replace-or-throw, and writes sitemap.xml and robots.txt from the same route table.
-// ogCardSvg draws the family's social card in the warm tone with the PhotoBoost mark, and
+// ogCardSvg draws the family's social card in the warm tone with the Revelei mark, and
 // renderOgCard rasterises it to dist/og.png at 1200 x 630. The 180 px touch icon is rasterised
 // from public/icon.svg, since an Apple device will not take an SVG for it.
 import { readFileSync, writeFileSync } from "node:fs";
@@ -20,7 +20,7 @@ const icon = readFileSync(join(siteDir, "public", "icon.svg"), "utf8");
 const card = await renderOgCard({
   // English, the default page's language; one card serves both, as og:image is one URL.
   svg: ogCardSvg({
-    eyebrow: "PhotoBoost · for Windows",
+    eyebrow: "Revelei · for Windows",
     title: ["Your photos, the way"],
     titleAccent: "you remember them.",
     line: ["Upscale, denoise, restore faces and remove the background,", "with AI, on your own PC. Nothing is uploaded."],

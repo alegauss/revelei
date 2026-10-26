@@ -397,7 +397,7 @@ def prepare(spec: Export, image: Path) -> np.ndarray:
 # PB48: the trimap a matting model is validated on, from RMBG's mask of the same photo. Unknown is
 # where the stretched mask is unsure, between the floor and 1 minus it, grown by the radius so the
 # matting model sees both sides of the edge; the rest is RMBG's mask thresholded at a half.
-# The floor is PhotoBoost.Inference's Matting.TrimapFloor: 0.1 beat 0.02 at every tile size there.
+# The floor is Revelei.Inference's Matting.TrimapFloor: 0.1 beat 0.02 at every tile size there.
 TRIMAP_FLOOR = 0.1
 TRIMAP_RADIUS = 8
 

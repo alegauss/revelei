@@ -1,6 +1,6 @@
 @echo off
 REM ==========================================================================
-REM update-release.cmd - Sets PhotoBoost's version and builds the release in
+REM update-release.cmd - Sets Revelei's version and builds the release in
 REM one step. After claude-tray's update-release.cmd.
 REM   1) Updates the version in Directory.Build.props and app.manifest.
 REM   2) Runs the tests (run-tests.cmd): no release comes out of a red build.
@@ -49,7 +49,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-set "SETUP=%CD%\artifacts\installer\PhotoBoost-Setup-%~1.exe"
+set "SETUP=%CD%\artifacts\installer\Revelei-Setup-%~1.exe"
 if not exist "%SETUP%" (
     echo *** ERROR: the expected installer does not exist: %SETUP% ***
     exit /b 1
@@ -91,7 +91,7 @@ if errorlevel 1 (
 )
 
 REM The release, with the installer attached and the notes GitHub generates.
-gh release create "v%~1" "%SETUP%" --title "PhotoBoost v%~1" --generate-notes
+gh release create "v%~1" "%SETUP%" --title "Revelei v%~1" --generate-notes
 if errorlevel 1 (
     echo *** ERROR: could not create the GitHub release. ***
     exit /b 1

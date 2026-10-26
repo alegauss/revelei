@@ -92,7 +92,7 @@ def fetch(source: Source, dest: Path, out=sys.stdout) -> str:
         have = 0
 
     if have < source.size:
-        request = urllib.request.Request(source.url, headers={"User-Agent": "photoboost-download/1"})
+        request = urllib.request.Request(source.url, headers={"User-Agent": "revelei-download/1"})
         if have:
             request.add_header("Range", f"bytes={have}-")
         try:
@@ -133,7 +133,7 @@ def _copy(response, f, have: int, source: Source, out) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Download the upstream model weights PhotoBoost exports to ONNX.")
+    parser = argparse.ArgumentParser(description="Download the upstream model weights Revelei exports to ONNX.")
     parser.add_argument("--dest", type=Path, default=DEFAULT_DEST, help="cache folder (default: .cache/weights)")
     parser.add_argument("--only", action="append", default=[], metavar="NAME", help="download just this model; repeatable")
     parser.add_argument("--include", action="append", default=[], metavar="NAME", help="also download an optional model; repeatable")

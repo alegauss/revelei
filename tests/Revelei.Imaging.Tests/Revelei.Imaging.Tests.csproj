@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Revelei.Imaging.Tests</RootNamespace>
+    <!-- The PNG writer hands WIC a pinned buffer. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Revelei.Imaging\Revelei.Imaging.csproj" />
+  </ItemGroup>
+
+</Project>

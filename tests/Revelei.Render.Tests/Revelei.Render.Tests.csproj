@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PB27: the surface's view arithmetic, and what it draws, rendered on WARP offscreen and read
+       back, so the comparison is checked pixel by pixel on any desk. -->
+  <PropertyGroup>
+    <RootNamespace>Revelei.Render.Tests</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Revelei.Render\Revelei.Render.csproj" />
+  </ItemGroup>
+
+</Project>

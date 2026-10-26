@@ -1,6 +1,6 @@
-# PhotoBoost
+# Revelei
 
-PhotoBoost is a Windows app that improves photos with AI models running on your own computer.
+Revelei is a Windows app that improves photos with AI models running on your own computer.
 Nothing is uploaded. It does four things:
 
 | Operation | Model |
@@ -29,8 +29,8 @@ WebP.
 
 ## Install
 
-Download `PhotoBoost-Setup-<version>.exe` from the
-[releases](https://github.com/Japode/photo-boost/releases). It installs for the current user,
+Download `Revelei-Setup-<version>.exe` from the
+[releases](https://github.com/Japode/revelei/releases). It installs for the current user,
 without administrator rights, and carries the models for upscaling and denoising, so those work
 offline from the first launch.
 
@@ -53,7 +53,7 @@ twice as fast.
 You need the **.NET SDK 10.0.100** or a later feature band (`global.json`).
 
 ```
-dotnet build PhotoBoost.slnx
+dotnet build Revelei.slnx
 .\run.cmd
 ```
 
@@ -68,7 +68,7 @@ another one on the PATH first.
 The app looks for each model in this order:
 
 1. the `models` folder beside the executable, which the installer fills;
-2. `%LOCALAPPDATA%\PhotoBoost\models`, where downloads go.
+2. `%LOCALAPPDATA%\Revelei\models`, where downloads go.
 
 `--models <folder>` replaces both with one folder. `run.cmd` uses `.cache\models` when that
 folder exists, which is where the export script writes. No model is stored in the repository.
@@ -147,7 +147,7 @@ By default (`--provider auto`) inference runs on DirectML, on the GPU with the m
 and falls back to the CPU if that does not run. On an NVIDIA RTX card where Windows ML has
 installed TensorRT-RTX, auto uses TensorRT-RTX for upscaling only. Each model's engine takes 10 to
 17 s to build. It is built in the background on first launch and kept in
-`%LOCALAPPDATA%\PhotoBoost\engines`, and until then upscaling stays on DirectML. Measured on an
+`%LOCALAPPDATA%\Revelei\engines`, and until then upscaling stays on DirectML. Measured on an
 RTX 4060, a 4× upscale of a 933 × 1405 photo went from 47 s to 5.4 s. Background removal ran three
 times slower on TensorRT-RTX, which is why the other operations stay on DirectML.
 `--provider winml` uses the Windows ML provider (TensorRT-RTX or OpenVINO) for every model it can
@@ -156,11 +156,11 @@ build.
 ## FP16 and FP32, measured
 
 The installer carries the FP16 set; FP32 is High quality. The table below comes from
-`tools\PhotoBoost.Bench`. It runs each operation through the app's own pipelines, on the model's
+`tools\Revelei.Bench`. It runs each operation through the app's own pipelines, on the model's
 own test photo, in both variants, on the CPU and on DirectML:
 
 ```
-dotnet run --project tools\PhotoBoost.Bench -c Release -- --out bench.md
+dotnet run --project tools\Revelei.Bench -c Release -- --out bench.md
 ```
 
 "First run" includes loading the session; "Run" is the faster of the two runs after it. Peak

@@ -9,7 +9,7 @@ using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 
-namespace PhotoBoost.Spike.GpuDisplay;
+namespace Revelei.Spike.GpuDisplay;
 
 /// <summary>
 /// PB40 spike: a 50 MP image on the GPU inside a WPF window, in a child HWND with a flip-model

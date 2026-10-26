@@ -4,7 +4,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
-    <!-- The app's and PhotoBoost.Inference's, which Windows ML sets (PB43). -->
+    <!-- The app's and Revelei.Inference's, which Windows ML sets (PB43). -->
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <!-- The app's RID, so ONNX Runtime's natives sit beside the test exe as they do beside the app's.
          Under runtimes\ only .NET finds them: Windows ML's native DLL asks Windows for onnxruntime.dll
@@ -35,7 +35,7 @@
   <!-- The repository's root, found once rather than walked to by a copy in every class. -->
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Repository.cs" Link="Repository.cs" />
-    <Using Include="PhotoBoost.Tests" />
+    <Using Include="Revelei.Tests" />
     <Using Include="Xunit" />
   </ItemGroup>
 

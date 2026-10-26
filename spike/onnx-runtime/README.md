@@ -2,7 +2,7 @@
 
 Which ONNX Runtime package runs in a self-contained x64 publish of this app, and what each
 provider costs. This folder is a record of the answer, not live code: it is outside
-`PhotoBoost.slnx` and no gate builds it.
+`Revelei.slnx` and no gate builds it.
 
 ## How it was measured
 

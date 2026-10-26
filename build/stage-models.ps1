@@ -22,7 +22,7 @@ if (-not $Models) { $Models = Join-Path $PSScriptRoot '..\.cache\models' }
 
 # PB58, the owner's choice of 2026-10-20: upscaling, denoising and the face detector. GFPGAN
 # (325 MB), RMBG-1.4 (168 MB) and ViTMatte (99 MB) were 84% of v0.1.0's models, for two operations
-# most photos never use, so their first use downloads them (FirstUse in PhotoBoost.Inference).
+# most photos never use, so their first use downloads them (FirstUse in Revelei.Inference).
 $required = @(
     'realesrgan-x4plus', 'realesrgan-x2plus', 'yunet-2023mar', 'scunet-color-real-psnr'
 )

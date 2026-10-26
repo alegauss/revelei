@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The WPF shell, and the only assembly allowed to reference all three libraries. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- Revelei.Inference's, which Windows ML sets (PB43). -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <RootNamespace>Revelei.App</RootNamespace>
+    <AssemblyName>Revelei</AssemblyName>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <!-- Per-Monitor V2 DPI awareness, so a photo is not bitmap-stretched on a second monitor. -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- The site's mark (site/public/icon.svg and favicon.svg), drawn per size by
+         `npm run app-icon` in site/: the exe's icon in Explorer, the taskbar and the installer. -->
+    <ApplicationIcon>Revelei.ico</ApplicationIcon>
+
+    <UseWPF>true</UseWPF>
+    <!-- WPF0001: ThemeMode is still marked [Experimental] in the SDK and is the supported way to
+         follow the system theme while running. The sibling apps carry the same suppression. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The same file as a resource, for the window's own title-bar and Alt+Tab icon. -->
+    <Resource Include="Revelei.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Revelei.Imaging\Revelei.Imaging.csproj" />
+    <ProjectReference Include="..\Revelei.Inference\Revelei.Inference.csproj" />
+    <ProjectReference Include="..\Revelei.Render\Revelei.Render.csproj" />
+  </ItemGroup>
+
+</Project>

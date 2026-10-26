@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using PhotoBoost.Spike.OnnxRuntime;
+using Revelei.Spike.OnnxRuntime;
 
 // PB5 spike: does this ONNX Runtime package load and run in a self-contained publish, and what
 // does each provider cost? Usage: OrtSpike <cpu|dml|cuda> [size] [device] [--placement] [--model <path>]

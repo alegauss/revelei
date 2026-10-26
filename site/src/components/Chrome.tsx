@@ -2,7 +2,7 @@ import { SiteButton, SiteFooter, SiteNav, SiteThemeToggle } from "@viglet/viglet
 import { asset, creditsFor, familyHref, familyName, languages, pageHref, releasesUrl, type Lang } from "../content";
 import { useLang, useWords } from "../i18n";
 
-// The nav and the footer, drawn by the design system's site layer so PhotoBoost sits in the
+// The nav and the footer, drawn by the design system's site layer so Revelei sits in the
 // same family as the other product sites. Everything between them is this product's own.
 
 const other = (lang: Lang): Lang => (lang === "en" ? "pt" : "en");
@@ -13,7 +13,7 @@ export function Nav() {
   const target = other(lang);
   return (
     <SiteNav
-      brand={{ href: pageHref(lang), name: "PhotoBoost", logo: asset("icon.svg") }}
+      brand={{ href: pageHref(lang), name: "Revelei", logo: asset("icon.svg") }}
       // PB49: the family chip, the way back to the Japode storefront.
       parent={{ href: familyHref, name: familyName, pre: w.family.pre, title: w.family.title }}
       links={w.nav.links}
@@ -31,7 +31,7 @@ export function Nav() {
           >
             {languages[lang].switchTo}
           </SiteButton>
-          <SiteThemeToggle storageKey="photoboost-theme" label={w.nav.themeLabel} />
+          <SiteThemeToggle storageKey="revelei-theme" label={w.nav.themeLabel} />
         </>
       }
     />
@@ -44,7 +44,7 @@ export function Footer() {
   const credits = creditsFor(lang);
   return (
     <SiteFooter
-      brand={{ href: pageHref(lang), name: "PhotoBoost", logo: asset("icon.svg") }}
+      brand={{ href: pageHref(lang), name: "Revelei", logo: asset("icon.svg") }}
       links={w.footer.links}
       disclaimer={
         <>

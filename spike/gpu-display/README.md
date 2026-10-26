@@ -1,7 +1,7 @@
 # GPU image display spike (PB40)
 
-How to show a 50 MP image on the GPU inside PhotoBoost's WPF window with smooth zoom and pan.
-This folder is a record of the answer, outside `PhotoBoost.slnx`; no gate builds it.
+How to show a 50 MP image on the GPU inside Revelei's WPF window with smooth zoom and pan.
+This folder is a record of the answer, outside `Revelei.slnx`; no gate builds it.
 
 ## The host was already decided
 
@@ -10,7 +10,7 @@ quickshell measured the three ways a WPF app can present a D3D swapchain (its QS
 flip-model swapchain reached one refresh interval click-to-pixel (13.8 ms min, 16.0 p10), while
 WPF's `D3DImage` never read below 32.4 ms at p10 and WinUI's `SwapChainPanel` never below
 28.4 ms. WPF's popups and modals are HWND-backed and drew correctly over the child HWND. That
-holds for PhotoBoost as much as for a terminal, so `D3DImage` was not rebuilt here. What this
+holds for Revelei as much as for a terminal, so `D3DImage` was not rebuilt here. What this
 spike adds is the part quickshell never had: a very large texture.
 
 ## What was measured
@@ -43,7 +43,7 @@ frame. WARP sustained 104 fps uncapped at this surface size.
 
 ## Answer
 
-- **Display through a child HWND with a flip-model swapchain** (`PhotoBoost.Render`), not WPF's
+- **Display through a child HWND with a flip-model swapchain** (`Revelei.Render`), not WPF's
   `Image`. A 50 MP image costs about 260 MB of video memory as RGBA8 with mips and pans and
   zooms without a frame over one refresh interval, on the GPU and on WARP alike.
 - **Show at 8 bits.** The display is 8-bit; a 16-bit source converts once on upload (RGBA16

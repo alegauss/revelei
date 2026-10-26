@@ -1,13 +1,13 @@
-# PhotoBoost site
+# Revelei site
 
-The public site, in English (`/photo-boost/`) and Portuguese (`/photo-boost/pt/`): a
+The public site, in English (`/revelei/`) and Portuguese (`/revelei/pt/`): a
 self-contained Vite + React 19 + TypeScript + Tailwind v4 workspace. `dotnet build` and
 `run-tests.cmd` neither build nor need it.
 
 The chrome is the family's: the nav, footer, buttons and theme toggle come from
 `@viglet/viglet-design-system/site`, the colours from its warm tone (`data-tone="warm"`, the
 `--vg-*` tokens), and the prerender and social card from its `/vite` helpers, as on the
-claude-tray site. The page between the nav and the footer is PhotoBoost's own and is built
+claude-tray site. The page between the nav and the footer is Revelei's own and is built
 around the experience rather than the family's feature grids: it opens on a before/after the
 reader can drag, then a dark "studio" to try each operation, the four moves from photo to
 result, and only then privacy, speed, details and the download.
@@ -16,7 +16,7 @@ result, and only then privacy, speed, details and the download.
 
 ```
 npm install        # once
-npm run dev        # dev server at /photo-boost/ (and /photo-boost/pt/)
+npm run dev        # dev server at /revelei/ (and /revelei/pt/)
 npm run build      # tsc, client, SSR, then the prerender: both pages, og.png, the touch icon
 npm run preview    # serve the built dist/
 ```
@@ -36,12 +36,12 @@ that lost an anchor fails the build.
 | `src/components/` | Hero, Studio, Journey, the later sections, and the chrome |
 | `public/icon.svg` | The mark: a photo split by the comparison divider, coarse pixels before it and the smooth scene after it, on the clay tile |
 | `public/favicon.svg` | The mark at tab size, with what does not survive 16 px taken out |
-| `public/demo/` | The example images, every one a real PhotoBoost result |
+| `public/demo/` | The example images, every one a real Revelei result |
 | `scripts/prerender.mjs` | The prerender, `og.png` and `apple-touch-icon.png` |
 
 ## The example images
 
-Every "after" image was made by the PhotoBoost app itself on 2026-10-20 (0.1.0, High quality,
+Every "after" image was made by the Revelei app itself on 2026-10-20 (0.1.0, High quality,
 DirectML on an RTX 4060 laptop GPU), driven through its window with `--export`; the timings on
 the page are those runs, model loading included. The photos are public domain, from Wikimedia
 Commons:

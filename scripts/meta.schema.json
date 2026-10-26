@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://photoboost.local/meta.schema.json",
-  "title": "PhotoBoost model meta.json",
-  "description": "PB11: what export-and-quantize.py writes beside each model's ONNX variants and PhotoBoost.Inference's ModelMeta reads. Bump schema when a field changes meaning.",
+  "$id": "https://revelei.local/meta.schema.json",
+  "title": "Revelei model meta.json",
+  "description": "PB11: what export-and-quantize.py writes beside each model's ONNX variants and Revelei.Inference's ModelMeta reads. Bump schema when a field changes meaning.",
   "type": "object",
   "required": ["schema", "name", "task", "scale", "input", "output", "tile", "variants", "upstream"],
   "additionalProperties": false,

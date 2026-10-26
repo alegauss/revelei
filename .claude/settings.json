@@ -4,7 +4,7 @@
     "allow": [
       "Bash(python .roadkeep/scripts/roadkeep.py:*)",
       "Bash(python \"${CLAUDE_PROJECT_DIR}/.roadkeep/scripts/roadkeep.py\":*)",
-      "Edit(/.claude/skills/photo-boost-roadmap-docs/**)"
+      "Edit(/.claude/skills/revelei-roadmap-docs/**)"
     ],
     "deny": [],
     "ask": []

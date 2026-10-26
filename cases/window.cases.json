@@ -98,7 +98,7 @@
 
   "cases": [
     {
-      "name": "a default installation puts a window named PhotoBoost on the desk",
+      "name": "a default installation puts a window named Revelei on the desk",
       "catches": "an app that builds its window and then shows something else, or nothing at all, which every in-process test would pass",
       "filed": "PB38",
       "tags": ["smoke", "window"],
@@ -108,7 +108,7 @@
           "locator": "TitleBar",
           "act": "read",
           "reads": "name",
-          "matches": "PhotoBoost$",
+          "matches": "Revelei$",
           "named": "the title bar ends in the app's name"
         }
       ]
@@ -695,7 +695,7 @@
           "locator": "Text#OperationNote",
           "act": "read",
           "reads": "name",
-          "expect": "4× would make this photo 16400 × 16400, past the 16384 × 16384 PhotoBoost can hold. Choose 2×, or a smaller photo.",
+          "expect": "4× would make this photo 16400 × 16400, past the 16384 × 16384 Revelei can hold. Choose 2×, or a smaller photo.",
           "named": "the note gives the size 4x would make and what to choose"
         },
         {

@@ -41,7 +41,7 @@ export function Studio() {
             <span />
             <span />
             <span />
-            <b>PhotoBoost</b>
+            <b>Revelei</b>
           </div>
           <div className="studio-body">
             <div className="studio-tabs" role="tablist" aria-orientation="vertical" aria-label={studio.tabsLabel} onKeyDown={onKey}>

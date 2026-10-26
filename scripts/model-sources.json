@@ -1,5 +1,5 @@
 {
-  "$comment": "PB6: upstream weights PhotoBoost exports to ONNX, each URL fetched and its license read on 2026-10-19. sha256 is the upstream's own where it publishes one (Hugging Face LFS) and computed from the downloaded file otherwise; size is bytes. scripts/download_models.py (PB7) reads this file. No weights live in the repository.",
+  "$comment": "PB6: upstream weights Revelei exports to ONNX, each URL fetched and its license read on 2026-10-19. sha256 is the upstream's own where it publishes one (Hugging Face LFS) and computed from the downloaded file otherwise; size is bytes. scripts/download_models.py (PB7) reads this file. No weights live in the repository.",
   "models": [
     {
       "name": "realesrgan-x4plus",

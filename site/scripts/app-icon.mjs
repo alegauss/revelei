@@ -6,14 +6,14 @@
 // whose shapes survive that size, and 48 px up from icon.svg, with the sun, the handle and the
 // sparkle. Each entry is a PNG, which the .ico format has allowed since Windows Vista.
 //
-//   npm run app-icon      writes ../src/PhotoBoost.App/PhotoBoost.ico
+//   npm run app-icon      writes ../src/Revelei.App/Revelei.ico
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Resvg } from "@resvg/resvg-js";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
-const out = join(siteDir, "..", "src", "PhotoBoost.App", "PhotoBoost.ico");
+const out = join(siteDir, "..", "src", "Revelei.App", "Revelei.ico");
 const small = readFileSync(join(siteDir, "public", "favicon.svg"), "utf8");
 const large = readFileSync(join(siteDir, "public", "icon.svg"), "utf8");
 

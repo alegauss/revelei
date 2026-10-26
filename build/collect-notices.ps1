@@ -14,16 +14,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 # Windows PowerShell 5.1 has no $PSScriptRoot while it binds parameters, so the default is here.
-if (-not $Assets) { $Assets = Join-Path $PSScriptRoot '..\src\PhotoBoost.App\obj\project.assets.json' }
+if (-not $Assets) { $Assets = Join-Path $PSScriptRoot '..\src\Revelei.App\obj\project.assets.json' }
 $resolved = Get-Content -Raw -Encoding UTF8 $Assets | ConvertFrom-Json
 $root = $resolved.packageFolders.PSObject.Properties.Name | Select-Object -First 1
 if (Test-Path $Out) { Remove-Item -Recurse -Force $Out }
 New-Item -ItemType Directory -Force $Out | Out-Null
 
 $lines = @(
-    'PhotoBoost third-party notices',
+    'Revelei third-party notices',
     '',
-    'PhotoBoost ships the packages below. Each folder here holds the license and notice files the',
+    'Revelei ships the packages below. Each folder here holds the license and notice files the',
     'package itself carries. The models the installer carries, in the models folder, list their',
     'licenses in the app''s About panel (GFPGAN v1.4 and RMBG-1.4 carry non-commercial terms).',
     ''

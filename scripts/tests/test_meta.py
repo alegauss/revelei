@@ -1,5 +1,5 @@
 """PB11: every meta.json - the committed example and whatever the export script has emitted -
-holds to scripts/meta.schema.json, the contract PhotoBoost.Inference's ModelMeta reads.
+holds to scripts/meta.schema.json, the contract Revelei.Inference's ModelMeta reads.
 
 Needs jsonschema (scripts/requirements.txt); without it the class is skipped and unittest says so.
 """

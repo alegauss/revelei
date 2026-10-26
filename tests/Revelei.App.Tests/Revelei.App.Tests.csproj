@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PB39: the app's own logic that needs no window, such as the command line. UseWPF because the
+       assembly it references is a WPF application; nothing here shows a window. -->
+  <PropertyGroup>
+    <RootNamespace>Revelei.App.Tests</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Revelei.App\Revelei.App.csproj" />
+  </ItemGroup>
+
+</Project>

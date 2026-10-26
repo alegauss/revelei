@@ -41,7 +41,7 @@ VARIANT = "fp32"
 # use. YuNet stays FP32 in the installer, so nothing downloads it.
 HOSTED = ["realesrgan-x4plus", "realesrgan-x2plus", "gfpgan-v1.4", "scunet-color-real-psnr", "vitmatte-small-composition-1k"]
 # PB58: the copy the app embeds, so it knows every file's size and hash without the network.
-EMBEDDED = REPO / "src" / "PhotoBoost.Inference" / "models-manifest.json"
+EMBEDDED = REPO / "src" / "Revelei.Inference" / "models-manifest.json"
 # Listed, with its file at the upstream's own pinned URL.
 EXTERNAL = {"rmbg-1.4": "rmbg-1.4-onnx"}
 
@@ -76,12 +76,12 @@ def model_card(manifest: dict) -> str:
         "---",
         "license: other",
         "license_name: per-model",
-        "tags: [onnx, image-restoration, super-resolution, photoboost]",
+        "tags: [onnx, image-restoration, super-resolution, revelei]",
         "---",
         "",
-        "# PhotoBoost models (FP32)",
+        "# Revelei models (FP32)",
         "",
-        "The FP32 ONNX models [PhotoBoost](https://github.com/Japode/photo-boost) downloads for its",
+        "The FP32 ONNX models [Revelei](https://github.com/Japode/revelei) downloads for its",
         "High quality mode. They are exported from each upstream's own weights and checked against",
         "PyTorch by `scripts/export-and-quantize.py`. Every file is listed in `manifest.json` with its",
         "size and SHA-256, and the app refuses one that differs. Each model keeps its upstream license:",
@@ -136,7 +136,7 @@ def upload(token: str, models: Path, stage_dir: Path) -> dict:
     # so it is left out here and rebuilt against this commit below.
     stage(models, stage_dir, resolve_base("pending"))
     (stage_dir / "manifest.json").unlink()
-    files = api.upload_folder(repo_id=REPO_ID, folder_path=str(stage_dir), commit_message=f"PhotoBoost FP32 models, manifest version {VERSION}")
+    files = api.upload_folder(repo_id=REPO_ID, folder_path=str(stage_dir), commit_message=f"Revelei FP32 models, manifest version {VERSION}")
     files_commit = files.oid
 
     # Commit 2: manifest.json with every URL pinned to commit 1.

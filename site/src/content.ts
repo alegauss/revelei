@@ -3,13 +3,13 @@
 // and not the other, and what does not change with the language (the images, their sizes, the
 // links, the measurements) is written once below them.
 //
-// The numbers are the ones measured when the demo images were made: 2026-10-20, PhotoBoost
+// The numbers are the ones measured when the demo images were made: 2026-10-20, Revelei
 // 0.1.0, High quality, DirectML on an NVIDIA GeForce RTX 4060 laptop GPU, each the first run of
 // its model, so loading it is included.
 
-export const THEME_KEY = "photoboost-theme";
-export const BASE = "/photo-boost/";
-export const repoUrl = "https://github.com/Japode/photo-boost";
+export const THEME_KEY = "revelei-theme";
+export const BASE = "/revelei/";
+export const repoUrl = "https://github.com/Japode/revelei";
 
 export const asset = (path: string) => `${BASE}${path}`;
 
@@ -182,7 +182,7 @@ type Words = {
 
 const en: Words = {
   meta: {
-    title: "PhotoBoost: better photos, right on your PC",
+    title: "Revelei: better photos, right on your PC",
     description:
       "Upscale, denoise, restore faces and remove the background of your photos with AI, on your own Windows computer. No cloud, no account, nothing uploaded.",
   },
@@ -207,15 +207,15 @@ const en: Words = {
     primary: "Try it on this page",
     secondary: "Download for Windows",
     hint: "Drag the line",
-    caption: "A 375 × 334 px photo enlarged 4× to 1500 × 1336 px in 1.9 s. On the left, an ordinary enlargement; on the right, PhotoBoost.",
+    caption: "A 375 × 334 px photo enlarged 4× to 1500 × 1336 px in 1.9 s. On the left, an ordinary enlargement; on the right, Revelei.",
     beforeLabel: "Ordinary enlargement",
-    afterLabel: "PhotoBoost 4×",
-    compareLabel: "Compare an ordinary enlargement with PhotoBoost",
+    afterLabel: "Revelei 4×",
+    compareLabel: "Compare an ordinary enlargement with Revelei",
   },
   studio: {
     eyebrow: "Try it",
     title: "Four things you will want to do with a photo.",
-    lead: "Every example below was made by PhotoBoost itself. Pick an operation and drag the line to compare.",
+    lead: "Every example below was made by Revelei itself. Pick an operation and drag the line to compare.",
     tabsLabel: "Operations",
     compareLabel: (before, after) => `Compare: ${before} and ${after}`,
     backdropLabel: "Background",
@@ -238,14 +238,14 @@ const en: Words = {
       title: "Detail where there was blur.",
       body: "A small photo, from an old phone or cropped from the web, becomes an image large enough to print. The AI does not stretch the pixels: it rebuilds fur and texture.",
       beforeLabel: "Ordinary enlargement",
-      afterLabel: "PhotoBoost 4×",
+      afterLabel: "Revelei 4×",
       note: "A crop at full size. The original was reduced to 25% and enlarged back, so there is a reference to compare against.",
     },
     {
       name: "Denoise",
       verb: "Low-light photos",
       title: "Night photos without the grain.",
-      body: "Low light and high ISO fill a photo with coloured specks. PhotoBoost takes the noise out and keeps the textures that matter, like bark and feathers.",
+      body: "Low light and high ISO fill a photo with coloured specks. Revelei takes the noise out and keeps the textures that matter, like bark and feathers.",
       beforeLabel: "Noisy",
       afterLabel: "Denoised",
       note: "The noise in this example was simulated (high ISO: photon, read and colour noise) on a clean photo, to show the effect clearly.",
@@ -254,7 +254,7 @@ const en: Words = {
       name: "Restore faces",
       verb: "Old and small photos",
       title: "Sharp faces in old photos.",
-      body: "PhotoBoost finds each face, aligns it, restores it and puts it back with a soft edge. A strength control decides how much of the restoration shows.",
+      body: "Revelei finds each face, aligns it, restores it and puts it back with a soft edge. A strength control decides how much of the restoration shows.",
       beforeLabel: "Original",
       afterLabel: "Restored",
       note: "A late 19th-century portrait from the US Library of Congress (public domain). GFPGAN has parts under a non-commercial license.",
@@ -311,7 +311,7 @@ const en: Words = {
   speed: {
     eyebrow: "Speed",
     title: "Fast with a graphics card. Works without one.",
-    lead: "With a DirectX 12 GPU PhotoBoost runs on DirectML, and on an NVIDIA RTX card it upscales with TensorRT-RTX once Windows has installed it; without a GPU, it runs on the processor. Large photos are processed in tiles, as large as the card's free memory allows.",
+    lead: "With a DirectX 12 GPU Revelei runs on DirectML, and on an NVIDIA RTX card it upscales with TensorRT-RTX once Windows has installed it; without a GPU, it runs on the processor. Large photos are processed in tiles, as large as the card's free memory allows.",
     head: ["Operation", "Size", "Time"],
     rows: [
       { op: "Upscale 4×", size: "375 × 334 → 1500 × 1336 px" },
@@ -337,7 +337,7 @@ const en: Words = {
   },
   download: {
     eyebrow: "Download",
-    title: "PhotoBoost for Windows.",
+    title: "Revelei for Windows.",
     status: "Available",
     body: "A 170 MB installer: upscaling and noise removal work offline from the first time you open it. Face restoration and background removal download their AI models the first time you use them, after telling you the size, the source and the license, and from then on they work offline too. Your photo is never uploaded. A high-quality set, also faster on a PC without a graphics card, is an optional download from the app's About screen.",
     cta: "Download the latest release",
@@ -355,7 +355,7 @@ const en: Words = {
     title: "Example photos",
     labels: ["Red fox", "Great horned owl", "Portrait of a young woman in a feathered hat", "Gray wolf"],
     by: ["USFWS Alaska", "USFWS", "US Library of Congress", "USFWS Midwest Region"],
-    note: "All public domain, processed by PhotoBoost for this page.",
+    note: "All public domain, processed by Revelei for this page.",
   },
   footer: {
     links: [
@@ -365,13 +365,13 @@ const en: Words = {
       { href: repoUrl, label: "GitHub" },
       { href: familyHref, label: "More from Japode" },
     ],
-    disclaimer: "PhotoBoost is a Japode product. The models' names belong to their authors.",
+    disclaimer: "Revelei is a Japode product. The models' names belong to their authors.",
   },
 };
 
 const pt: Words = {
   meta: {
-    title: "PhotoBoost: fotos melhores, direto no seu PC",
+    title: "Revelei: fotos melhores, direto no seu PC",
     description:
       "Amplie, tire o ruído, restaure rostos e remova o fundo das suas fotos com IA, no seu próprio computador com Windows. Sem nuvem, sem conta, sem enviar nada.",
   },
@@ -396,15 +396,15 @@ const pt: Words = {
     primary: "Experimente aqui na página",
     secondary: "Baixar para Windows",
     hint: "Arraste a linha",
-    caption: "Uma foto de 375 × 334 px ampliada 4× para 1500 × 1336 px em 1,9 s. À esquerda, a ampliação comum; à direita, o PhotoBoost.",
+    caption: "Uma foto de 375 × 334 px ampliada 4× para 1500 × 1336 px em 1,9 s. À esquerda, a ampliação comum; à direita, o Revelei.",
     beforeLabel: "Ampliação comum",
-    afterLabel: "PhotoBoost 4×",
-    compareLabel: "Comparar a ampliação comum com o PhotoBoost",
+    afterLabel: "Revelei 4×",
+    compareLabel: "Comparar a ampliação comum com o Revelei",
   },
   studio: {
     eyebrow: "Experimente",
     title: "Quatro coisas que você vai querer fazer com uma foto.",
-    lead: "Cada exemplo abaixo foi feito pelo próprio PhotoBoost. Escolha uma operação e arraste a linha para comparar.",
+    lead: "Cada exemplo abaixo foi feito pelo próprio Revelei. Escolha uma operação e arraste a linha para comparar.",
     tabsLabel: "Operações",
     compareLabel: (before, after) => `Comparar: ${before} e ${after}`,
     backdropLabel: "Fundo",
@@ -427,14 +427,14 @@ const pt: Words = {
       title: "Detalhe onde antes havia borrão.",
       body: "Uma foto pequena, de celular antigo ou recortada da internet, vira uma imagem grande o bastante para imprimir. A IA não estica os pixels: ela reconstrói pelo e textura.",
       beforeLabel: "Ampliação comum",
-      afterLabel: "PhotoBoost 4×",
+      afterLabel: "Revelei 4×",
       note: "Recorte em tamanho real. A original foi reduzida a 25% e ampliada de volta, para que haja uma referência com que comparar.",
     },
     {
       name: "Tirar ruído",
       verb: "Fotos com pouca luz",
       title: "Fotos da noite sem o granulado.",
-      body: "Pouca luz e ISO alto deixam a foto cheia de pontinhos coloridos. O PhotoBoost tira o ruído e mantém as texturas que importam, como casca de árvore e penas.",
+      body: "Pouca luz e ISO alto deixam a foto cheia de pontinhos coloridos. O Revelei tira o ruído e mantém as texturas que importam, como casca de árvore e penas.",
       beforeLabel: "Com ruído",
       afterLabel: "Sem ruído",
       note: "O ruído deste exemplo foi simulado (ISO alto: ruído de fóton, de leitura e de cor) sobre uma foto limpa, para mostrar o efeito com clareza.",
@@ -443,7 +443,7 @@ const pt: Words = {
       name: "Restaurar rostos",
       verb: "Fotos antigas e pequenas",
       title: "Rostos nítidos em fotos antigas.",
-      body: "O PhotoBoost encontra cada rosto, alinha, restaura e devolve ao lugar com uma borda suave. Um controle de intensidade decide quanto da restauração aparece.",
+      body: "O Revelei encontra cada rosto, alinha, restaura e devolve ao lugar com uma borda suave. Um controle de intensidade decide quanto da restauração aparece.",
       beforeLabel: "Original",
       afterLabel: "Restaurado",
       note: "Retrato do fim do século XIX, da Biblioteca do Congresso dos EUA (domínio público). O GFPGAN tem partes sob licença não comercial.",
@@ -500,7 +500,7 @@ const pt: Words = {
   speed: {
     eyebrow: "Desempenho",
     title: "Rápido com placa de vídeo. Funciona sem ela.",
-    lead: "Com uma GPU compatível com DirectX 12 o PhotoBoost usa DirectML, e numa placa NVIDIA RTX amplia com o TensorRT-RTX quando o Windows o instalou; sem GPU, roda no processador. Fotos grandes são processadas em blocos, do tamanho que a memória livre da placa permite.",
+    lead: "Com uma GPU compatível com DirectX 12 o Revelei usa DirectML, e numa placa NVIDIA RTX amplia com o TensorRT-RTX quando o Windows o instalou; sem GPU, roda no processador. Fotos grandes são processadas em blocos, do tamanho que a memória livre da placa permite.",
     head: ["Operação", "Tamanho", "Tempo"],
     rows: [
       { op: "Ampliar 4×", size: "375 × 334 → 1500 × 1336 px" },
@@ -526,7 +526,7 @@ const pt: Words = {
   },
   download: {
     eyebrow: "Baixar",
-    title: "PhotoBoost para Windows.",
+    title: "Revelei para Windows.",
     status: "Disponível",
     body: "Um instalador de 170 MB: ampliar e remover ruído funcionam offline desde a primeira vez que você abre. Restaurar rostos e remover o fundo baixam seus modelos de IA na primeira vez que você usa, depois de mostrar o tamanho, a origem e a licença, e a partir daí também funcionam offline. Sua foto nunca é enviada. Um conjunto de alta qualidade, também mais rápido num PC sem placa de vídeo, é um download opcional na tela Sobre do app.",
     cta: "Baixar a versão mais recente",
@@ -544,7 +544,7 @@ const pt: Words = {
     title: "Fotos dos exemplos",
     labels: ["Raposa-vermelha", "Coruja-orelhuda", "Retrato de jovem com chapéu de plumas", "Lobo-cinzento"],
     by: ["USFWS Alaska", "USFWS", "Biblioteca do Congresso dos EUA", "USFWS Midwest Region"],
-    note: "Todas em domínio público, processadas pelo PhotoBoost para esta página.",
+    note: "Todas em domínio público, processadas pelo Revelei para esta página.",
   },
   footer: {
     links: [
@@ -554,7 +554,7 @@ const pt: Words = {
       { href: repoUrl, label: "GitHub" },
       { href: familyHref, label: "Mais da Japode" },
     ],
-    disclaimer: "PhotoBoost é um produto Japode. Os nomes dos modelos pertencem aos seus autores.",
+    disclaimer: "Revelei é um produto Japode. Os nomes dos modelos pertencem aos seus autores.",
   },
 };
 

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 /* The ground, the type and the clay family are the design system's: tokens.css keyed by
    data-tone="warm" on <html> and data-theme for the mode, and site.css for the nav, footer and
-   buttons. The layout below is PhotoBoost's own: the page is built around pictures and the
+   buttons. The layout below is Revelei's own: the page is built around pictures and the
    gesture of comparing them, so the sections are stages and scenes rather than the family's
    card grids. No webfont is fetched: --font-sans names Inter with system fallbacks. */
 @import "@viglet/viglet-design-system/tokens.css";
