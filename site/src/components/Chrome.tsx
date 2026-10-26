@@ -14,7 +14,7 @@ export function Nav() {
   return (
     <SiteNav
       brand={{ href: pageHref(lang), name: "Revelei", logo: asset("icon.svg") }}
-      // PB49: the family chip, the way back to the Japode storefront.
+      // PB49: the family chip, the way back to the Alegauss storefront.
       parent={{ href: familyHref, name: familyName, pre: w.family.pre, title: w.family.title }}
       links={w.nav.links}
       actions={

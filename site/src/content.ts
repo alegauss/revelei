@@ -9,14 +9,14 @@
 
 export const THEME_KEY = "revelei-theme";
 export const BASE = "/revelei/";
-export const repoUrl = "https://github.com/Japode/revelei";
+export const repoUrl = "https://github.com/alegauss/revelei";
 
 export const asset = (path: string) => `${BASE}${path}`;
 
-// PB49: the Japode storefront, at the root of the origin this site is served from, so the link
-// works on japode.com and on japode.github.io alike.
+// PB49: the Alegauss storefront, at the root of the origin this site is served from, so the
+// link works on a custom domain and on alegauss.github.io alike.
 export const familyHref = "/";
-export const familyName = "Japode";
+export const familyName = "Alegauss";
 
 export type Lang = "en" | "pt";
 export type Backdrop = "checker" | "white" | "clay" | "night";
@@ -198,7 +198,7 @@ const en: Words = {
   },
   family: {
     pre: "part of",
-    title: "Japode: small software that does one job",
+    title: "Alegauss: small software that does one job",
   },
   hero: {
     eyebrow: "For Windows · runs on your computer",
@@ -363,9 +363,9 @@ const en: Words = {
       { href: "#privacy", label: "Privacy" },
       { href: "#download", label: "Download" },
       { href: repoUrl, label: "GitHub" },
-      { href: familyHref, label: "More from Japode" },
+      { href: familyHref, label: "More from Alegauss" },
     ],
-    disclaimer: "Revelei is a Japode product. The models' names belong to their authors.",
+    disclaimer: "Revelei is an Alegauss product. The models' names belong to their authors.",
   },
 };
 
@@ -387,7 +387,7 @@ const pt: Words = {
   },
   family: {
     pre: "parte da",
-    title: "Japode: softwares pequenos que fazem uma coisa bem",
+    title: "Alegauss: softwares pequenos que fazem uma coisa bem",
   },
   hero: {
     eyebrow: "Para Windows · roda no seu computador",
@@ -552,9 +552,9 @@ const pt: Words = {
       { href: "#privacy", label: "Privacidade" },
       { href: "#download", label: "Baixar" },
       { href: repoUrl, label: "GitHub" },
-      { href: familyHref, label: "Mais da Japode" },
+      { href: familyHref, label: "Mais da Alegauss" },
     ],
-    disclaimer: "Revelei é um produto Japode. Os nomes dos modelos pertencem aos seus autores.",
+    disclaimer: "Revelei é um produto Alegauss. Os nomes dos modelos pertencem aos seus autores.",
   },
 };
 

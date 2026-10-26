@@ -81,7 +81,7 @@ def model_card(manifest: dict) -> str:
         "",
         "# Revelei models (FP32)",
         "",
-        "The FP32 ONNX models [Revelei](https://github.com/Japode/revelei) downloads for its",
+        "The FP32 ONNX models [Revelei](https://github.com/alegauss/revelei) downloads for its",
         "High quality mode. They are exported from each upstream's own weights and checked against",
         "PyTorch by `scripts/export-and-quantize.py`. Every file is listed in `manifest.json` with its",
         "size and SHA-256, and the app refuses one that differs. Each model keeps its upstream license:",

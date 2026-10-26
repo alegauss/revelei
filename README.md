@@ -30,7 +30,7 @@ WebP.
 ## Install
 
 Download `Revelei-Setup-<version>.exe` from the
-[releases](https://github.com/Japode/revelei/releases). It installs for the current user,
+[releases](https://github.com/alegauss/revelei/releases). It installs for the current user,
 without administrator rights, and carries the models for upscaling and denoising, so those work
 offline from the first launch.
 
