@@ -28,19 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB74 A models folder the person chooses
-
-The Models panel gets a Location row: the folder, the space used and free there, and a
-Change button. Changing it moves the existing downloads (copy, verify by size, then
-delete the old copy, with progress and cancel) and records the choice in the app's
-settings, so `Options.ModelFolders` reads it on the next launch; `--models` on the
-command line still overrides it for the tests and the bench.
-
-The installer's own `models` folder beside the executable is not moved and stays first
-in the search order. A chosen folder that later disappears (an unplugged drive) is
-reported in the status bar and the operations that need it offer to download again or to
-point at the folder, rather than failing on a missing file.
-
 ### §PB75 The Models panel
 
 A Models button beside About opens a panel that replaces the Downloads block of About
@@ -55,8 +42,9 @@ each; the installed version and, when there is one, the update, its size and the
 catalog's one-line note (`ModelUpdates.State`, `UpdateAsync`), with an "Update
 automatically" switch off by default, a Withdrawn label, and no update offered for the
 installer's models; and the actions Download, Pause, Resume, Cancel, Update and Remove,
-all going through the queue (PB73). The footer shows the location and free space (PB74),
-Check now with the catalog date (PB70), and the queue.
+all going through the queue (PB73). The footer shows the location and free space with a
+Change button that runs `ModelsFolderMove` and saves `AppSettings` (PB74), Check now
+with the catalog date (PB70), and the queue.
 
 About keeps the version, the notices and a one-line "N models installed, X GB" that
 opens this panel. The first-use cards of Restore faces and Remove background keep their

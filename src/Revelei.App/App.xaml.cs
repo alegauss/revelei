@@ -24,7 +24,8 @@ public partial class App : Application
             return;
         }
 
-        MainWindow window = new(parsed.Options!);
+        // PB74: the models folder the person chose, unless --models names one for this run.
+        MainWindow window = new(parsed.Options! with { ChosenModels = AppSettings.Load(AppSettings.DefaultPath).ModelsFolder });
         MainWindow = window;
         window.Show();
     }

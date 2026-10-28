@@ -20,13 +20,15 @@ public enum QualityMode
 /// <param name="Export">Where to write the result when the run ends, staying open.</param>
 /// <param name="Quality">The quality mode to start in, or null for the saved one.</param>
 /// <param name="Manifest">A manifest file to download models from instead of the pinned one (PB59).</param>
+/// <param name="ChosenModels">PB74: the models folder the person chose, from <see cref="AppSettings"/>; --models overrides it.</param>
 public sealed record AppOptions(
     string? Open = null,
     string? Models = null,
     ProviderPreference Provider = ProviderPreference.Auto,
     string? Export = null,
     QualityMode? Quality = null,
-    string? Manifest = null)
+    string? Manifest = null,
+    string? ChosenModels = null)
 {
     /// <summary>%LOCALAPPDATA%\Revelei\models, where downloaded models go unless --models says otherwise.</summary>
     public static string DefaultModels =>
@@ -36,10 +38,16 @@ public sealed record AppOptions(
     public static string BundledModels => Path.Combine(AppContext.BaseDirectory, "models");
 
     /// <summary>The models folder this run downloads into and names when a model is missing.</summary>
-    public string ModelsFolder => Models ?? DefaultModels;
+    public string ModelsFolder => Models ?? ChosenModels ?? DefaultModels;
 
     /// <summary>The folders this run reads models from, in order: --models alone, else the bundled set then the downloads.</summary>
-    public IReadOnlyList<string> ModelFolders => Models is { } given ? [given] : [BundledModels, DefaultModels];
+    public IReadOnlyList<string> ModelFolders => Models is { } given ? [given] : [BundledModels, ModelsFolder];
+
+    /// <summary>
+    /// PB74: the chosen folder is gone, an unplugged drive say, so its models cannot load; said in
+    /// the status bar rather than met as a missing file. --models is the tests' and is not asked.
+    /// </summary>
+    public bool ChosenModelsMissing => Models is null && ChosenModels is { } chosen && !Directory.Exists(chosen);
 }
 
 /// <summary>A parse: the options, or why the command line was refused.</summary>

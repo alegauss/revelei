@@ -135,6 +135,12 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (Options.ChosenModelsMissing)
+        {
+            DownloadChipText.Text = $"The models folder {Options.ChosenModels} cannot be found. Reconnect its drive, or download the models again.";
+            DownloadChip.Visibility = Visibility.Visible;
+        }
+
         if (Options.Open is { } open)
         {
             await OpenAsync(open).ConfigureAwait(true);

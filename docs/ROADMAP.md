@@ -18,8 +18,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- 📋 **PB74** (deps: —) **Downloaded models can only live in %LOCALAPPDATA%, so a 15 GB model fills the system drive** — Only --models changes the folder, from the command line; a person with a small C: and a large D: has no way to put models there. → §PB74
-- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 ✅, PB74) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
+- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 ✅, PB74 ✅) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
 - 💭 **PB76** (deps: PB72 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
 
 ## Block J — Generate an image from a prompt

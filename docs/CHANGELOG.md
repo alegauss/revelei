@@ -98,6 +98,7 @@
 - ✅ **PB71** **An installed model is never known to be out of date, so a fixed or improved version is never offered** — An update is staged in .update, verified, then moved over the old files; a failed one leaves the model as it was (design superseded: a staging folder replaced versioned folders and a pointer).
 - ✅ **PB72** **Nothing says whether a model will run well, slowly or not at all on this PC before its gigabytes are downloaded** — Each quantisation gets a verdict (runs well, slower, CPU only, does not fit) with its reason, and the best one is recommended (design recorded in `src/Revelei.Inference/HardwareFit.cs`).
 - ✅ **PB73** **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — Files models share are kept once by SHA-256 in .shared and removed with the last model that uses them.
+- ✅ **PB74** **Downloaded models can only live in %LOCALAPPDATA%, so a 15 GB model fills the system drive** — A chosen models folder is saved in settings and read at launch, models move there by copy, check and delete, and a missing one is said (design recorded in `src/Revelei.Inference/ModelsFolderMove.cs`).
 
 ## Block J — Generate an image from a prompt
 

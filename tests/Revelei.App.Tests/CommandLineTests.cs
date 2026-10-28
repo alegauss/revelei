@@ -27,6 +27,41 @@ public sealed class CommandLineTests
     }
 
     [Fact]
+    public void AChosenModelsFolderIsUsedUnlessModelsOverridesIt()
+    {
+        // PB74: the folder the person chose in settings; --models stays the tests' and the bench's.
+        string chosen = Path.Combine(Path.GetTempPath(), "pb-chosen-" + Guid.NewGuid().ToString("N"));
+        AppOptions options = new(ChosenModels: chosen);
+
+        Assert.Equal(chosen, options.ModelsFolder);
+        Assert.Equal([AppOptions.BundledModels, chosen], options.ModelFolders);
+        Assert.True(options.ChosenModelsMissing);
+        Assert.Equal("given", (options with { Models = "given" }).ModelsFolder);
+        Assert.False((options with { Models = "given" }).ChosenModelsMissing);
+        Assert.False(new AppOptions().ChosenModelsMissing);
+    }
+
+    [Fact]
+    public void SettingsRoundTripAndADamagedFileReadsAsTheDefaults()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "pb-settings-" + Guid.NewGuid().ToString("N"));
+        string file = Path.Combine(folder, "settings.json");
+        try
+        {
+            Assert.Equal(new AppSettings(), AppSettings.Load(file));
+            new AppSettings(@"D:\Models").Save(file);
+            Assert.Equal(@"D:\Models", AppSettings.Load(file).ModelsFolder);
+
+            File.WriteAllText(file, "{ not json");
+            Assert.Equal(new AppSettings(), AppSettings.Load(file));
+        }
+        finally
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+    }
+
+    [Fact]
     public void EveryFlagParsesWithASpaceOrAnEqualsSign()
     {
         ParsedCommandLine parsed = CommandLine.Parse(
