@@ -97,7 +97,7 @@
 - ✅ **PB70** **The downloadable models are fixed at build time, so a new model or a fixed file needs a new Revelei release** — build-manifest.py writes a schema 2 catalog, sign-catalog.py signs it, the app verifies it; publishing is PB84 (design recorded in `src/Revelei.Inference/ModelCatalog.cs`).
 - ✅ **PB71** **An installed model is never known to be out of date, so a fixed or improved version is never offered** — An update is staged in .update, verified, then moved over the old files; a failed one leaves the model as it was (design superseded: a staging folder replaced versioned folders and a pointer).
 - ✅ **PB72** **Nothing says whether a model will run well, slowly or not at all on this PC before its gigabytes are downloaded** — Each quantisation gets a verdict (runs well, slower, CPU only, does not fit) with its reason, and the best one is recommended (design recorded in `src/Revelei.Inference/HardwareFit.cs`).
-- ✅ **PB73 (disk check and streaming hash)** **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — A download is refused before its first byte when the drive cannot hold it, and each file is hashed as it streams.
+- ✅ **PB73 (disk check, streaming hash, queue)** **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — Downloads are refused when the disk is short, hashed as they stream, and queued one at a time across restarts.
 
 ## Block J — Generate an image from a prompt
 

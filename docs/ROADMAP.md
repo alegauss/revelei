@@ -18,9 +18,9 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- ⏳ **PB73** (deps: PB70 ✅) **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — A queue that survives a restart, and files shared between models stored once by SHA-256. → §PB73
+- 🛠 **PB73** (deps: PB70 ✅) **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — Files shared between models stored once by SHA-256 and removed with the last model that uses them. → §PB73
 - 📋 **PB74** (deps: —) **Downloaded models can only live in %LOCALAPPDATA%, so a 15 GB model fills the system drive** — Only --models changes the folder, from the command line; a person with a small C: and a large D: has no way to put models there. → §PB74
-- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 ⏳, PB74) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
+- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 🛠, PB74) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
 - 💭 **PB76** (deps: PB72 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
 
 ## Block J — Generate an image from a prompt
@@ -31,7 +31,7 @@
 - 📋 **PB80** (deps: PB75, PB78, PB79) **There is no screen to write a prompt, pick a model and size, and watch an image being generated** — This is the feature itself: a person who installed only Revelei should go from a sentence to an image without leaving the app. → §PB80
 - 💭 **PB81** (deps: PB78) **A generation that runs out of video or system memory fails instead of retrying in a way that fits** — The photo operations already fall back to smaller tiles and then the CPU (PB21); generation needs the same, or an 8 GB card fails on the models it can run. → §PB81
 - 📋 **PB82** (deps: PB80) **A generated image cannot be upscaled, edited or exported, and its prompt and seed are lost once saved** — Revelei's own operations are what make a generated image usable (a 4x upscale, a removed background), and without the prompt and seed a good image cannot be reproduced. → §PB82
-- 💭 **PB83** (deps: PB73 ⏳, PB78) **The installer carries no generation engine, so a fresh install could not generate even after a model is downloaded** — The goal is one download for everything: the native engine ships with Revelei, with its license, and the larger GPU-specific backend arrives like a model. → §PB83
+- 💭 **PB83** (deps: PB73 🛠, PB78) **The installer carries no generation engine, so a fresh install could not generate even after a model is downloaded** — The goal is one download for everything: the native engine ships with Revelei, with its license, and the larger GPU-specific backend arrives like a model. → §PB83
 
 ## Done when — PB73
 
