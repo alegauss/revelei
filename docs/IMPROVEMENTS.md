@@ -36,11 +36,11 @@ byte without the network, and it must survive.
 
 The catalog becomes schema 2, published beside the models on Hugging Face at a stable
 path, and the app keeps embedding the copy it was built with as the fallback and the
-floor. A fetched catalog is used only when (a) its Ed25519 signature verifies against a
-public key compiled into the app, and (b) its sequence number is not lower than the
-embedded one, so a stale or replayed file can never roll a model back. Every file inside
-it is still a resolve/<commit>/ URL with size and SHA-256, so the trust per file is
-unchanged.
+floor. A fetched catalog is used only when (a) its ECDSA P-256 (.NET has no Ed25519)
+signature verifies against a public key compiled into the app, and (b) its sequence
+number is not lower than the embedded one, so a stale or replayed file can never roll a
+model back. Every file inside it is still a resolve/<commit>/ URL with size and SHA-256,
+so the trust per file is unchanged.
 
 Schema 2 adds, per model: a version, a kind (`onnx` for today's operations, `diffusion`
 for block J), a list of files with roles (weights, text encoder, VAE) instead of one

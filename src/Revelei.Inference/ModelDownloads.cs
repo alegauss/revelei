@@ -13,18 +13,62 @@ namespace Revelei.Inference;
 /// <param name="Sha256">Its SHA-256, lowercase hex.</param>
 public sealed record ManifestFile(string Url, long Bytes, string Sha256);
 
+/// <summary>One file of a schema 2 quantisation, and what it is for (PB70).</summary>
+/// <param name="Role">weights for an ONNX model; transformer, text-encoder or vae for a diffusion one.</param>
+/// <param name="File">Where it is and what it must be.</param>
+public sealed record ManifestPart(string Role, ManifestFile File);
+
+/// <summary>What a quantisation needs to run, for the hardware-fit verdict (PB72).</summary>
+/// <param name="VideoBytes">Video memory it needs to run without spilling into RAM.</param>
+/// <param name="SystemBytes">System memory it needs.</param>
+public sealed record ManifestMemory(long VideoBytes, long SystemBytes);
+
+/// <summary>One way to download a model (fp32, fp16, q4...): its files and what it needs.</summary>
+/// <param name="Files">Its files, by role.</param>
+/// <param name="Memory">What it needs to run, or null where the catalog does not say.</param>
+public sealed record ManifestQuantisation(IReadOnlyList<ManifestPart> Files, ManifestMemory? Memory = null);
+
+/// <summary>What runs a model.</summary>
+public enum ModelKind
+{
+    /// <summary>One ONNX file through Windows ML: today's photo operations.</summary>
+    Onnx,
+
+    /// <summary>A text-to-image model of several files (block J).</summary>
+    Diffusion,
+}
+
 /// <summary>One model the manifest lists.</summary>
 /// <param name="Name">Its folder name.</param>
 /// <param name="Meta">Its meta.json.</param>
 /// <param name="Variants">Its ONNX files, by variant.</param>
 /// <param name="License">Its license, as the About panel shows it.</param>
-public sealed record ManifestModel(string Name, ManifestFile Meta, IReadOnlyDictionary<string, ManifestFile> Variants, string License);
+/// <param name="ModelVersion">PB70: the model's own version, which an update compares; null in schema 1.</param>
+/// <param name="Kind">PB70: what runs it.</param>
+/// <param name="NonCommercial">PB70: whether its license forbids commercial use.</param>
+/// <param name="Quantisations">PB70: every way to download it; schema 1's variants read as weights alone.</param>
+public sealed record ManifestModel(
+    string Name,
+    ManifestFile Meta,
+    IReadOnlyDictionary<string, ManifestFile> Variants,
+    string License,
+    string? ModelVersion = null,
+    ModelKind Kind = ModelKind.Onnx,
+    bool NonCommercial = false,
+    IReadOnlyDictionary<string, ManifestQuantisation>? Quantisations = null);
 
-/// <summary>scripts/build-manifest.py's manifest.json (PB12), schema 1.</summary>
+/// <summary>
+/// scripts/build-manifest.py's manifest.json (PB12), schema 1, or the catalog PB70 publishes at a
+/// stable path, schema 2, which adds versions, kinds, files by role and memory per quantisation.
+/// </summary>
 /// <param name="Schema">The format version.</param>
 /// <param name="Version">The manifest's own version.</param>
 /// <param name="Models">The models it lists.</param>
-public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<ManifestModel> Models)
+/// <param name="Sequence">
+/// PB70: only ever grows, so a fetched catalog lower than the embedded one is a replay and is
+/// refused (<see cref="ModelCatalog"/>). Schema 1 has none and reads as 0.
+/// </param>
+public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<ManifestModel> Models, long Sequence = 0)
 {
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -40,30 +84,88 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
     /// with --manifest, such as the UI cases' fixture server's. The pinned manifest never does.
     /// </param>
     /// <returns>The manifest.</returns>
-    /// <exception cref="InvalidDataException">It is not schema 1, or a URL is not https.</exception>
+    /// <exception cref="InvalidDataException">It is not schema 1 or 2, or a URL is not https.</exception>
     public static ModelManifest Parse(string json, bool loopback = false)
     {
         ModelManifest manifest;
         try
         {
-            manifest = JsonSerializer.Deserialize<ModelManifest>(json, Options) ?? throw new InvalidDataException("The manifest is empty.");
+            int schema = JsonSerializer.Deserialize<SchemaOnly>(json, Options)?.Schema ?? throw new InvalidDataException("The manifest is empty.");
+            manifest = schema switch
+            {
+                1 => Schema1(JsonSerializer.Deserialize<ModelManifest>(json, Options)!),
+                2 => JsonSerializer.Deserialize<Catalog2>(json, Options)!.Read(),
+                _ => throw new InvalidDataException($"The manifest is schema {schema}; this build reads 1 and 2."),
+            };
         }
         catch (JsonException error)
         {
             throw new InvalidDataException($"The manifest is not valid: {error.Message}", error);
         }
 
-        if (manifest.Schema != 1)
-        {
-            throw new InvalidDataException($"The manifest is schema {manifest.Schema}; this build reads 1.");
-        }
-
-        if (manifest.Models.SelectMany(m => m.Variants.Values.Append(m.Meta)).FirstOrDefault(f => !Trusted(f.Url, loopback)) is { } plain)
+        if (manifest.Models.SelectMany(Listed).FirstOrDefault(f => !Trusted(f.Url, loopback)) is { } plain)
         {
             throw new InvalidDataException($"The manifest lists {plain.Url}, which is not https.");
         }
 
         return manifest;
+    }
+
+    private static IEnumerable<ManifestFile> Listed(ManifestModel model) =>
+        model.Variants.Values
+            .Concat((model.Quantisations ?? new Dictionary<string, ManifestQuantisation>()).Values.SelectMany(q => q.Files.Select(p => p.File)))
+            .Append(model.Meta);
+
+    // Schema 1 lists one ONNX file per variant; read as a quantisation of weights alone, so
+    // whatever reads quantisations reads both schemas alike.
+    private static ModelManifest Schema1(ModelManifest manifest) => manifest with
+    {
+        Models = [.. manifest.Models.Select(m => m with
+        {
+            Quantisations = m.Variants.ToDictionary(v => v.Key, v => new ManifestQuantisation([new ManifestPart(Weights, v.Value)])),
+        })],
+    };
+
+    private const string Weights = "weights";
+
+    private sealed record SchemaOnly(int Schema);
+
+    private sealed record Catalog2(int Schema, string Version, long Sequence, IReadOnlyList<Model2> Models)
+    {
+        public ModelManifest Read() => new(Schema, Version, [.. Models.Select(m => m.Read())], Sequence);
+    }
+
+    private sealed record Model2(
+        string Name,
+        string Version,
+        string Kind,
+        ManifestFile Meta,
+        IReadOnlyDictionary<string, ManifestQuantisation> Quantisations,
+        string License,
+        bool NonCommercial = false)
+    {
+        public ManifestModel Read()
+        {
+            ModelKind kind = Kind switch
+            {
+                "onnx" => ModelKind.Onnx,
+                "diffusion" => ModelKind.Diffusion,
+                _ => throw new InvalidDataException($"{Name} is of kind {Kind}, which this build cannot run."),
+            };
+
+            // An ONNX model is still one file per quantisation, which is what downloads fetch today.
+            Dictionary<string, ManifestFile> variants = [];
+            if (kind == ModelKind.Onnx)
+            {
+                foreach ((string quantisation, ManifestQuantisation listed) in Quantisations)
+                {
+                    variants[quantisation] = listed.Files.SingleOrDefault(p => p.Role == Weights)?.File
+                        ?? throw new InvalidDataException($"{Name} {quantisation} must list exactly one weights file.");
+                }
+            }
+
+            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations);
+        }
     }
 
     private static bool Trusted(string url, bool loopback) =>

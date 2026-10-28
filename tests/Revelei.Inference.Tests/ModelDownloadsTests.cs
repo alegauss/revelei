@@ -188,7 +188,7 @@ public sealed class ModelDownloadsTests : IDisposable
     [Fact]
     public void AManifestOfAnotherSchemaOrWithAPlainHttpUrlIsRefused()
     {
-        Assert.Throws<InvalidDataException>(() => ModelManifest.Parse("""{"schema": 2, "version": "1", "models": []}"""));
+        Assert.Throws<InvalidDataException>(() => ModelManifest.Parse("""{"schema": 3, "version": "1", "models": []}"""));
         Assert.Throws<InvalidDataException>(() => ModelManifest.Parse(
             """{"schema": 1, "version": "1", "models": [{"name": "m", "meta": {"url": "http://x/m.json", "bytes": 1, "sha256": "00"}, "variants": {}, "license": "l"}]}"""));
     }

@@ -94,5 +94,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
+- ✅ **PB70 (app half: schema 2 and signed refresh)** **The downloadable models are fixed at build time, so a new model or a fixed file needs a new Revelei release** — The app reads schema 2 catalogs and takes a fetched one only when its ECDSA P-256 signature verifies and its sequence is not below the embedded one.
+
 ## Block J — Generate an image from a prompt
 
