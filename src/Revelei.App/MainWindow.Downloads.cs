@@ -67,7 +67,8 @@ public partial class MainWindow
             yield break;
         }
 
-        foreach (DirectoryInfo folder in new DirectoryInfo(Options.ModelsFolder).EnumerateDirectories().OrderBy(d => d.Name, StringComparer.Ordinal))
+        // PB73: .shared holds files models share by SHA-256, and is not a model of its own.
+        foreach (DirectoryInfo folder in new DirectoryInfo(Options.ModelsFolder).EnumerateDirectories().Where(d => !d.Name.StartsWith('.')).OrderBy(d => d.Name, StringComparer.Ordinal))
         {
             FileInfo[] files = folder.GetFiles("*", SearchOption.AllDirectories);
             long bytes = files.Sum(f => f.Length);
@@ -156,10 +157,10 @@ public partial class MainWindow
         }
 
         string folder = Path.Combine(Options.ModelsFolder, name);
-        long bytes = Directory.Exists(folder) ? new DirectoryInfo(folder).GetFiles("*", SearchOption.AllDirectories).Sum(f => f.Length) : 0;
         try
         {
-            Directory.Delete(folder, recursive: true);
+            // PB73: a shared file goes with the last model that uses it.
+            long bytes = ModelDownloads.Remove(Options.ModelsFolder, name);
             DownloadStatus.Text = $"Removed {name}, freeing {DownloadText.Size(bytes)}. The operation that uses it offers the download again.";
         }
         catch (Exception failure) when (failure is IOException or UnauthorizedAccessException)

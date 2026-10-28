@@ -28,19 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB73 Downloads sized for gigabytes
-
-`ModelDownloads.DownloadAsync` already resumes by HTTP Range, retries with back-off and
-verifies SHA-256 before the rename. Four things change for large files:
-
-1. **Free disk before the first byte.** The download refuses with the missing amount when the drive cannot hold the files plus a margin, instead of failing with a full disk.
-2. **Hash while streaming.** An `IncrementalHash` fed by each chunk avoids reading a 12 GB file a second time; on resume the existing .part is hashed once to seed it.
-3. **A queue.** Several models can be requested; one downloads at a time (the bandwidth is the limit), the rest wait in order, each can be paused, resumed, moved up or cancelled, and the queue survives a restart because it is written to disk.
-4. **Shared files once.** Z-Image Turbo and FLUX.2 klein both use a Qwen3 4B text encoder. Files are stored by SHA-256 in a shared folder and each model references them, so a shared encoder is downloaded once and removed only when no installed model uses it.
-
-The existing first-use cards for faces and background keep their behaviour and go
-through the same queue.
-
 ### §PB74 A models folder the person chooses
 
 The Models panel gets a Location row: the folder, the space used and free there, and a

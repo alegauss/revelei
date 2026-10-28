@@ -357,37 +357,8 @@ public static class ModelDownloads
                 continue;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            string part = path + ".part";
             long before = done;
-            TimeSpan pause = retryDelay ?? TimeSpan.FromSeconds(1);
-            string? digest;
-            for (int attempt = 1; ; attempt++)
-            {
-                try
-                {
-                    digest = await FetchAsync(http, expected, part, label, before, total, speed, progress, cancellation).ConfigureAwait(false);
-                    break;
-                }
-                catch (Exception failure) when (Transient(failure) && !cancellation.IsCancellationRequested && attempt < Attempts)
-                {
-                    progress?.Report(new DownloadProgress(label, before + PartialBytes(path), total, DownloadStage.Retrying));
-                    await Task.Delay(pause, cancellation).ConfigureAwait(false);
-                    pause *= 2;
-                }
-            }
-
-            progress?.Report(new DownloadProgress(label, before + expected.Bytes, total, DownloadStage.Verifying, speed.BytesPerSecond));
-            bool valid = digest is null
-                ? Valid(part, expected)
-                : new FileInfo(part).Length == expected.Bytes && digest == expected.Sha256;
-            if (!valid)
-            {
-                File.Delete(part);
-                throw new InvalidDataException($"{label} arrived different from the manifest (size or SHA-256), so it was deleted and nothing was loaded.");
-            }
-
-            File.Move(part, path, overwrite: true);
+            await FetchVerifiedAsync(http, expected, path, label, before, total, speed, progress, cancellation, retryDelay).ConfigureAwait(false);
             atRoot.Add(path);
             fetchedNow.Add(path);
             fetched++;
@@ -396,6 +367,149 @@ public static class ModelDownloads
 
         Record(manifest, root, models, atRoot, fetchedNow);
         return new DownloadResult(fetched, present);
+    }
+
+    /// <summary>The folder in the download folder where files listed by SHA-256 are kept once for every model.</summary>
+    public const string SharedFolder = ".shared";
+
+    /// <summary>
+    /// PB73: fetches one quantisation of a model of several files, such as a diffusion model's
+    /// transformer, text encoder and VAE. Each file is kept once in <see cref="SharedFolder"/>,
+    /// named by its SHA-256, so a text encoder two models list is downloaded once; the model's own
+    /// folder holds its meta.json and an installed.json naming the files it uses, by role.
+    /// </summary>
+    /// <param name="http">The client.</param>
+    /// <param name="catalog">The catalog.</param>
+    /// <param name="root">The folder downloads go to.</param>
+    /// <param name="model">The model's name.</param>
+    /// <param name="quantisation">Which of its quantisations.</param>
+    /// <param name="progress">Told as <see cref="DownloadAsync"/> tells it.</param>
+    /// <param name="cancellation">Cancels between chunks; .part files stay and resume.</param>
+    /// <param name="retryDelay">The first pause before a retry.</param>
+    /// <returns>How many files were fetched and how many were already there.</returns>
+    /// <exception cref="InvalidOperationException">The catalog does not list that model or quantisation.</exception>
+    public static async Task<DownloadResult> DownloadPartsAsync(
+        HttpClient http,
+        ModelManifest catalog,
+        string root,
+        string model,
+        string quantisation,
+        IProgress<DownloadProgress>? progress,
+        CancellationToken cancellation,
+        TimeSpan? retryDelay = null)
+    {
+        ArgumentNullException.ThrowIfNull(http);
+        ArgumentNullException.ThrowIfNull(catalog);
+        ManifestModel listed = catalog.Model(model) ?? throw new InvalidOperationException($"The catalog does not list {model}.");
+        ManifestQuantisation chosen = listed.Quantisations?.GetValueOrDefault(quantisation) ?? throw new InvalidOperationException($"The catalog lists no {quantisation} of {model}.");
+        string folder = Path.Combine(root, model);
+        List<(string Path, string Label, ManifestFile Expected)> files =
+            [.. chosen.Files.DistinctBy(p => p.File.Sha256).Select(p => (Path.Combine(root, SharedFolder, p.File.Sha256), $"{model}/{p.Role}", p.File)),
+             (Path.Combine(folder, "meta.json"), $"{model}/meta.json", listed.Meta)];
+
+        long total = files.Sum(f => f.Expected.Bytes);
+        long needed = files.Where(f => !Sized(f.Path, f.Expected)).Sum(f => f.Expected.Bytes - Math.Min(PartialBytes(f.Path), f.Expected.Bytes));
+        EnsureFree(root, needed);
+
+        long done = 0;
+        int fetched = 0, present = 0;
+        Speed speed = new();
+        foreach ((string path, string label, ManifestFile expected) in files)
+        {
+            if (Valid(path, expected))
+            {
+                present++;
+            }
+            else
+            {
+                await FetchVerifiedAsync(http, expected, path, label, done, total, speed, progress, cancellation, retryDelay).ConfigureAwait(false);
+                fetched++;
+            }
+
+            done += expected.Bytes;
+            progress?.Report(new DownloadProgress(label, done, total));
+        }
+
+        Dictionary<string, string> uses = chosen.Files.ToDictionary(p => p.Role, p => p.File.Sha256, StringComparer.Ordinal);
+        uses["meta.json"] = listed.Meta.Sha256;
+        new InstalledRecord(ModelUpdates.VersionOf(listed), quantisation, DateTimeOffset.Now, uses).Write(folder);
+        return new DownloadResult(fetched, present);
+    }
+
+    /// <summary>
+    /// Removes a downloaded model's folder, then every shared file no remaining model's
+    /// installed.json names, so a text encoder goes with the last model that used it.
+    /// </summary>
+    /// <param name="root">The folder downloads go to.</param>
+    /// <param name="model">The model's name.</param>
+    /// <returns>The bytes freed.</returns>
+    public static long Remove(string root, string model)
+    {
+        string folder = Path.Combine(root, model);
+        long freed = 0;
+        if (Directory.Exists(folder))
+        {
+            freed += new DirectoryInfo(folder).GetFiles("*", SearchOption.AllDirectories).Sum(f => f.Length);
+            Directory.Delete(folder, recursive: true);
+        }
+
+        string shared = Path.Combine(root, SharedFolder);
+        if (!Directory.Exists(shared))
+        {
+            return freed;
+        }
+
+        HashSet<string> used = [.. Directory.EnumerateDirectories(root)
+            .Select(InstalledRecord.Read)
+            .OfType<InstalledRecord>()
+            .SelectMany(r => r.Files.Values)];
+        foreach (FileInfo file in new DirectoryInfo(shared).GetFiles())
+        {
+            string name = file.Name.EndsWith(".part", StringComparison.Ordinal) ? file.Name[..^".part".Length] : file.Name;
+            if (!used.Contains(name))
+            {
+                freed += file.Length;
+                file.Delete();
+            }
+        }
+
+        return freed;
+    }
+
+    // One file through .part, retried while the failure is transient, verified by the hash taken
+    // while streaming, and renamed into place only then; one that arrives different is deleted.
+    private static async Task FetchVerifiedAsync(HttpClient http, ManifestFile expected, string path, string label, long before, long total, Speed speed, IProgress<DownloadProgress>? progress, CancellationToken cancellation, TimeSpan? retryDelay)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        string part = path + ".part";
+        TimeSpan pause = retryDelay ?? TimeSpan.FromSeconds(1);
+        string? digest;
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                digest = await FetchAsync(http, expected, part, label, before, total, speed, progress, cancellation).ConfigureAwait(false);
+                break;
+            }
+            catch (Exception failure) when (Transient(failure) && !cancellation.IsCancellationRequested && attempt < Attempts)
+            {
+                progress?.Report(new DownloadProgress(label, before + PartialBytes(path), total, DownloadStage.Retrying));
+                await Task.Delay(pause, cancellation).ConfigureAwait(false);
+                pause *= 2;
+            }
+        }
+
+        progress?.Report(new DownloadProgress(label, before + expected.Bytes, total, DownloadStage.Verifying, speed.BytesPerSecond));
+        bool valid = digest is null
+            ? Valid(part, expected)
+            : new FileInfo(part).Length == expected.Bytes && digest == expected.Sha256;
+        if (!valid)
+        {
+            File.Delete(part);
+            throw new InvalidDataException($"{label} arrived different from the manifest (size or SHA-256), so it was deleted and nothing was loaded.");
+        }
+
+        File.Move(part, path, overwrite: true);
     }
 
     // One attempt at one file: resumes from the .part when the server honours a range, and
@@ -478,9 +592,11 @@ public static class ModelDownloads
 
     // PB73: refuses before the first byte when the drive cannot hold what is left plus a margin,
     // where a 12 GB download would otherwise fail with a full disk most of the way through.
-    private static void EnsureDisk(ModelManifest manifest, string root, IReadOnlyList<string>? elsewhere, IReadOnlyCollection<string>? models)
+    private static void EnsureDisk(ModelManifest manifest, string root, IReadOnlyList<string>? elsewhere, IReadOnlyCollection<string>? models) =>
+        EnsureFree(root, PendingBytes(manifest, root, elsewhere, models));
+
+    private static void EnsureFree(string root, long needed)
     {
-        long needed = PendingBytes(manifest, root, elsewhere, models);
         if (needed == 0)
         {
             return;
