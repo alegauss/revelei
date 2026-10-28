@@ -18,11 +18,10 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- 📋 **PB72** (deps: PB70 ✅) **Nothing says whether a model will run well, slowly or not at all on this PC before its gigabytes are downloaded** — Image-generation models range from 3 to 20 GB and run on 8 GB cards only by spilling into RAM, so a person needs the verdict before choosing. → §PB72
 - 📋 **PB73** (deps: PB70 ✅) **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — ModelDownloads was sized for files under 350 MB; generation models are 3 to 20 GB, where a full disk mid-way and a second read to hash both cost minutes. → §PB73
 - 📋 **PB74** (deps: —) **Downloaded models can only live in %LOCALAPPDATA%, so a 15 GB model fills the system drive** — Only --models changes the folder, from the command line; a person with a small C: and a large D: has no way to put models there. → §PB74
-- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72, PB73, PB74) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many models of several gigabytes, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
-- 💭 **PB76** (deps: PB72) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
+- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73, PB74) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
+- 💭 **PB76** (deps: PB72 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
 
 ## Block J — Generate an image from a prompt
 

@@ -28,30 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB72 A hardware verdict per model and quantisation
-
-The machine is already half measured: `GpuAdapters` reads each GPU's dedicated video
-memory and vendor, and `ProviderDetector` knows whether DirectML or TensorRT-RTX runs.
-Add system RAM (`GlobalMemoryStatusEx`), free disk on the models drive, and the GPU's
-shared memory.
-
-The catalog (PB70) carries, for each model and quantisation, the bytes that must sit in
-video memory for a full-GPU run, the bytes that can be streamed from RAM when
-offloading, and the disk. The verdict is one of four, with the reason in words:
-
-- **Runs well**: fits in video memory with a margin.
-- **Runs, slower**: fits only by offloading to RAM; says roughly how much slower.
-- **CPU only, very slow**: no usable GPU but enough RAM.
-- **Does not fit**: names what is short (RAM or disk) and by how much.
-
-For each model the panel recommends the best quantisation whose verdict is Runs well, or
-failing that Runs, slower, so on an RTX 4060 with 8 GB and 64 GB of RAM it would pick
-Z-Image Turbo Q4 as Runs well and Qwen-Image Q4 as Runs, slower.
-
-The numbers are estimates until the model has run here; the measured-speed task replaces
-them with this PC's own timings. The logic lives in Revelei.Inference with unit tests
-over fixed machine profiles, not in the window.
-
 ### §PB73 Downloads sized for gigabytes
 
 `ModelDownloads.DownloadAsync` already resumes by HTTP Range, retries with back-off and
