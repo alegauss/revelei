@@ -18,7 +18,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- 📋 **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 ✅, PB74 ✅) **Models are managed from a flat text list inside About, with one Download everything button** — Choosing among many multi-gigabyte models, with updates and hardware verdicts, needs its own panel; About should go back to the version and the licenses. → §PB75
+- ⏳ **PB75** (deps: PB70 ✅, PB71 ✅, PB72 ✅, PB73 ✅, PB74 ✅) **Models are managed from a flat text list inside About, with one Download everything button** — The panel itself: Models button, card list, filters, actions through the queue, footer, About trimmed and cases moved. → §PB75
 - 💭 **PB76** (deps: PB72 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
 
 ## Block J — Generate an image from a prompt
@@ -26,10 +26,17 @@
 - 📋 **PB77** (deps: —) **No engine in Revelei can run a text-to-image diffusion model, let alone one bigger than 8 GB of video memory** — Windows ML runs Revelei's small ONNX models but cannot stream a 6 to 20 GB diffusion model from RAM, so the engine must be chosen and measured first. → §PB77
 - 💭 **PB78** (deps: PB77) **Nothing in the app can turn a prompt into pixels: no layer loads a diffusion model, reports its steps or cancels it** — The window needs one tested seam over the native engine, as Revelei.Inference is over Windows ML, so a crash or a leak in native code stays contained. → §PB78
 - 💭 **PB79** (deps: PB70 ✅, PB77) **The catalog lists no text-to-image model, so there is nothing to download for generation** — Each model is several files (transformer, text encoder, VAE) in several quantisations, each needing hashes, memory figures and a checked license before the app offers it. → §PB79
-- 📋 **PB80** (deps: PB75, PB78, PB79) **There is no screen to write a prompt, pick a model and size, and watch an image being generated** — This is the feature itself: a person who installed only Revelei should go from a sentence to an image without leaving the app. → §PB80
+- 📋 **PB80** (deps: PB75 ⏳, PB78, PB79) **There is no screen to write a prompt, pick a model and size, and watch an image being generated** — This is the feature itself: a person who installed only Revelei should go from a sentence to an image without leaving the app. → §PB80
 - 💭 **PB81** (deps: PB78) **A generation that runs out of video or system memory fails instead of retrying in a way that fits** — The photo operations already fall back to smaller tiles and then the CPU (PB21); generation needs the same, or an 8 GB card fails on the models it can run. → §PB81
 - 📋 **PB82** (deps: PB80) **A generated image cannot be upscaled, edited or exported, and its prompt and seed are lost once saved** — Revelei's own operations are what make a generated image usable (a 4x upscale, a removed background), and without the prompt and seed a good image cannot be reproduced. → §PB82
 - 💭 **PB83** (deps: PB73 ✅, PB78) **The installer carries no generation engine, so a fresh install could not generate even after a model is downloaded** — The goal is one download for everything: the native engine ships with Revelei, with its license, and the larger GPU-specific backend arrives like a model. → §PB83
+
+## Done when — PB75
+
+- **The Models panel replaces About's Downloads block and its cases pass there** A
+  Models button opens a card per catalog model with its actions; About keeps the
+  version, notices and an installed summary; the winwright cases that drove About's
+  downloads drive the panel.
 
 ## Non-goals
 

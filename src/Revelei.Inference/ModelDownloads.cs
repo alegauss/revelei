@@ -48,6 +48,7 @@ public enum ModelKind
 /// <param name="NonCommercial">PB70: whether its license forbids commercial use.</param>
 /// <param name="Quantisations">PB70: every way to download it; schema 1's variants read as weights alone.</param>
 /// <param name="Note">PB71: one line on what this version changed, which an update shows.</param>
+/// <param name="Task">PB75: what it does (upscale, face-restore, background-removal, denoise...), which groups it.</param>
 public sealed record ManifestModel(
     string Name,
     ManifestFile Meta,
@@ -57,7 +58,8 @@ public sealed record ManifestModel(
     ModelKind Kind = ModelKind.Onnx,
     bool NonCommercial = false,
     IReadOnlyDictionary<string, ManifestQuantisation>? Quantisations = null,
-    string? Note = null);
+    string? Note = null,
+    string? Task = null);
 
 /// <summary>
 /// scripts/build-manifest.py's manifest.json (PB12), schema 1, or the catalog PB70 publishes at a
@@ -119,11 +121,13 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
             .Append(model.Meta);
 
     // Schema 1 lists one ONNX file per variant; read as a quantisation of weights alone, so
-    // whatever reads quantisations reads both schemas alike.
+    // whatever reads quantisations reads both schemas alike. It has no non-commercial flag, so the
+    // license says it, as build-manifest.py's catalog() decides it for schema 2.
     private static ModelManifest Schema1(ModelManifest manifest) => manifest with
     {
         Models = [.. manifest.Models.Select(m => m with
         {
+            NonCommercial = m.License.Contains("non-commercial", StringComparison.OrdinalIgnoreCase),
             Quantisations = m.Variants.ToDictionary(v => v.Key, v => new ManifestQuantisation([new ManifestPart(Weights, v.Value)])),
         })],
     };
@@ -145,7 +149,8 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
         IReadOnlyDictionary<string, ManifestQuantisation> Quantisations,
         string License,
         bool NonCommercial = false,
-        string? Note = null)
+        string? Note = null,
+        string? Task = null)
     {
         public ManifestModel Read()
         {
@@ -167,7 +172,7 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
                 }
             }
 
-            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations, Note);
+            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations, Note, Task);
         }
     }
 
