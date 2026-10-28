@@ -31,6 +31,7 @@ public enum CardFilter
 /// <param name="InstalledVersion">The version downloaded, from installed.json, or null.</param>
 /// <param name="State">How the download compares with the catalog (PB71), or null when not downloaded.</param>
 /// <param name="Note">The catalog's note on what the listed version changed.</param>
+/// <param name="Measured">PB76: how fast it ran here, which replaces the estimate once it has run.</param>
 public sealed record ModelCard(
     string Name,
     string Title,
@@ -45,7 +46,8 @@ public sealed record ModelCard(
     bool Bundled,
     string? InstalledVersion,
     UpdateState? State,
-    string? Note)
+    string? Note,
+    Measured? Measured = null)
 {
     /// <summary>Whether the card offers Update: a newer download, never for the installer's own.</summary>
     public bool CanUpdate => State == UpdateState.UpdateAvailable && !Bundled;
@@ -68,11 +70,15 @@ public static class ModelCards
     /// <param name="root">The folder downloads go to.</param>
     /// <param name="bundled">The installer's models folder, or null.</param>
     /// <param name="machine">This PC.</param>
+    /// <param name="measured">PB76: what has run here, from <see cref="MeasuredSpeed.From"/>; null for none.</param>
     /// <returns>The cards.</returns>
-    public static IReadOnlyList<ModelCard> Build(ModelManifest catalog, string root, string? bundled, MachineProfile machine)
+    public static IReadOnlyList<ModelCard> Build(ModelManifest catalog, string root, string? bundled, MachineProfile machine, IReadOnlyList<Measured>? measured = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
-        List<ModelCard> cards = [.. catalog.Models.Select(model => Card(model, root, bundled, machine, catalog))];
+        List<ModelCard> cards = [.. catalog.Models.Select(model => Card(model, root, bundled, machine, catalog) with
+        {
+            Measured = MeasuredSpeed.For(measured ?? [], model.Name),
+        })];
 
         // A withdrawn model keeps working and keeps its card, labelled, until it is removed.
         cards.AddRange(ModelUpdates.States(catalog, root)

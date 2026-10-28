@@ -18,7 +18,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- 💭 **PB76** (deps: PB72 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — Estimates from file sizes miss the driver, the provider and the RAM speed; a measured time per image is what tells a person if a model is usable. → §PB76
+- ⏳ **PB76** (deps: PB72 ✅, PB78) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — A Test speed button, and generation's own measure once its engine reports per step. → §PB76
 - 📋 **PB85** (deps: PB75 ✅) **A model card offers only the recommended quantisation; a larger or smaller one cannot be chosen** — Picking quality against speed and disk is the person's call, and the verdict per quantisation is already computed. → §PB85
 
 ## Block J — Generate an image from a prompt
@@ -30,6 +30,13 @@
 - 💭 **PB81** (deps: PB78) **A generation that runs out of video or system memory fails instead of retrying in a way that fits** — The photo operations already fall back to smaller tiles and then the CPU (PB21); generation needs the same, or an 8 GB card fails on the models it can run. → §PB81
 - 📋 **PB82** (deps: PB80) **A generated image cannot be upscaled, edited or exported, and its prompt and seed are lost once saved** — Revelei's own operations are what make a generated image usable (a 4x upscale, a removed background), and without the prompt and seed a good image cannot be reproduced. → §PB82
 - 💭 **PB83** (deps: PB73 ✅, PB78) **The installer carries no generation engine, so a fresh install could not generate even after a model is downloaded** — The goal is one download for everything: the native engine ships with Revelei, with its license, and the larger GPU-specific backend arrives like a model. → §PB83
+
+## Done when — PB76
+
+- **Test speed measures a model, generation included, through the bench's code path** A
+  card's Test speed runs the model once on a fixed input (its test image, or a fixed
+  prompt and seed), logs it, and the card shows the measurement; the bench tool calls
+  the same code.
 
 ## Non-goals
 

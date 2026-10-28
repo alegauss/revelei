@@ -30,10 +30,10 @@ mirroring, this line is retired.
 
 ### §PB76 Measured speed replaces the estimate
 
-Every run already logs its duration (`OperationLog`). Keep, per model, quantisation and
-provider, the median of the last few runs with the input size (megapixels for the photo
-operations, resolution and steps for generation) and the peak memory, in a small JSON
-file beside the settings.
+Every run already logs its duration (`OperationLog`). For the photo operations
+`MeasuredSpeed` reads it: the median of the last few runs per model, variant and
+provider, by megapixel. Generation needs its own measure (resolution and steps, peak
+memory), logged the same way once its engine reports them.
 
 The Models card then shows "Measured here: 14 s per 1024x1024 image" instead of the
 estimate, and the verdict is recomputed from it. A Test speed button runs the model once

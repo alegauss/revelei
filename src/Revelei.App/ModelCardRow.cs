@@ -38,8 +38,13 @@ public sealed class ModelCardRow(ModelCard card, QueuedDownload? queued, bool ru
         Card.NonCommercial ? "non-commercial" : null,
     }.Where(part => !string.IsNullOrEmpty(part)));
 
-    /// <summary>How it would run here (PB72), in words.</summary>
-    public string Fit => Card.Verdict is { } verdict ? $"{Words(verdict.Fit)}: {verdict.Reason}" : "Does not fit this PC.";
+    /// <summary>How it ran here (PB76), or failing that how it would (PB72), in words.</summary>
+    public string Fit => Card switch
+    {
+        { Measured: { } measured } => MeasuredSpeed.Line(measured),
+        { Verdict: { } verdict } => $"{Words(verdict.Fit)}: {verdict.Reason}",
+        _ => "Does not fit this PC.",
+    };
 
     /// <summary>Installed, its version, its update, or where it is in the queue.</summary>
     public string Status => progress ?? (queued, running) switch

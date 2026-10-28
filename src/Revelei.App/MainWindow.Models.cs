@@ -50,7 +50,7 @@ public partial class MainWindow
     {
         machine ??= MachineProfile.Measure(Options.ModelsFolder);
         string? bundled = Options.Models is null ? AppOptions.BundledModels : null;
-        IReadOnlyList<ModelCard> cards = ModelCards.Build(Manifest, Options.ModelsFolder, bundled, machine);
+        IReadOnlyList<ModelCard> cards = ModelCards.Build(Manifest, Options.ModelsFolder, bundled, machine, MeasuredSpeed.From(log.ReadCurrent()));
         IReadOnlyList<QueuedDownload> waiting = Queue.Items;
         string? running = Queue.Running;
         CardFilter filter = ModelsFilterInstalled.IsChecked == true ? CardFilter.Installed

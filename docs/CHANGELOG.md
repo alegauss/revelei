@@ -100,6 +100,7 @@
 - ✅ **PB73** **A multi-gigabyte download starts without checking free disk, cannot be queued, and is read twice to hash it** — Files models share are kept once by SHA-256 in .shared and removed with the last model that uses them.
 - ✅ **PB74** **Downloaded models can only live in %LOCALAPPDATA%, so a 15 GB model fills the system drive** — A chosen models folder is saved in settings and read at launch, models move there by copy, check and delete, and a missing one is said (design recorded in `src/Revelei.Inference/ModelsFolderMove.cs`).
 - ✅ **PB75** **Models are managed from a flat text list inside About, with one Download everything button** — A Models panel lists each catalog model as a card with its verdict, version and queued actions; About keeps a summary (design superseded: Check now went to PB84, the picker to PB85).
+- ✅ **PB76 (photo operations, from the log)** **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — A model that has run here shows its measured seconds per megapixel on its card, the median of its recent runs in the operation log.
 
 ## Block J — Generate an image from a prompt
 
