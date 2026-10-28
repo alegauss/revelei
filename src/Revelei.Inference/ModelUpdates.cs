@@ -96,11 +96,7 @@ public static class ModelUpdates
         string folder = Path.Combine(root, model);
         if (InstalledRecord.Read(folder) is { } record)
         {
-            bool same = record.Version == VersionOf(listed)
-                && listed.Variants.TryGetValue(record.Quantisation, out ManifestFile? weights)
-                && record.Files.GetValueOrDefault(record.Quantisation + ".onnx") == weights.Sha256
-                && record.Files.GetValueOrDefault("meta.json") == listed.Meta.Sha256;
-            return same ? UpdateState.UpToDate : UpdateState.UpdateAvailable;
+            return record.Version == VersionOf(listed) && SameFiles(record, listed) ? UpdateState.UpToDate : UpdateState.UpdateAvailable;
         }
 
         // Downloaded before installed.json existed: the sizes are what tell.
@@ -121,6 +117,62 @@ public static class ModelUpdates
                 .Select(Path.GetFileName)
                 .Order(StringComparer.Ordinal)
                 .Select(name => (name!, State(catalog, root, name!)))];
+
+    /// <summary>
+    /// Brings one downloaded model to the catalog's version. The new files are fetched into
+    /// &lt;model&gt;/.update/ and verified there, by the same resumable path every download takes;
+    /// only then are they moved over the old ones, weights before meta.json and installed.json
+    /// last, and the staging folder deleted. A failed, cancelled or interrupted update leaves the
+    /// working model as it was, and the next try resumes it. Where only the version changed and
+    /// the files did not, the record is rewritten and nothing is fetched.
+    /// </summary>
+    /// <param name="http">The client.</param>
+    /// <param name="catalog">The catalog that lists the update.</param>
+    /// <param name="root">The folder downloads go to; the installer's models are a new installer's to update.</param>
+    /// <param name="model">The model's folder name.</param>
+    /// <param name="progress">Told as <see cref="ModelDownloads.DownloadAsync"/> tells it.</param>
+    /// <param name="cancellation">Cancels the fetch; the staged .part files stay for the next try.</param>
+    /// <param name="retryDelay">The first pause before a retry.</param>
+    /// <returns>How many files were fetched.</returns>
+    /// <exception cref="InvalidOperationException">The catalog does not list the model.</exception>
+    public static async Task<DownloadResult> UpdateAsync(
+        HttpClient http,
+        ModelManifest catalog,
+        string root,
+        string model,
+        IProgress<DownloadProgress>? progress,
+        CancellationToken cancellation,
+        TimeSpan? retryDelay = null)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ManifestModel listed = catalog.Model(model) ?? throw new InvalidOperationException($"The catalog no longer lists {model}, so there is nothing to update it to.");
+        string folder = Path.Combine(root, model);
+        string staging = Path.Combine(folder, Staging);
+        if (InstalledRecord.Read(folder) is { } record && SameFiles(record, listed))
+        {
+            (record with { Version = VersionOf(listed) }).Write(folder);
+            return new DownloadResult(0, 0);
+        }
+
+        DownloadResult result = await ModelDownloads.DownloadAsync(http, catalog, staging, progress, cancellation, models: [model], retryDelay: retryDelay).ConfigureAwait(false);
+
+        string staged = Path.Combine(staging, model);
+        foreach (string name in (string[])[ModelDownloads.Variant + ".onnx", "meta.json", InstalledRecord.FileName])
+        {
+            File.Move(Path.Combine(staged, name), Path.Combine(folder, name), overwrite: true);
+        }
+
+        Directory.Delete(staging, recursive: true);
+        return result;
+    }
+
+    /// <summary>The folder inside a model's own where an update is staged until it is verified.</summary>
+    public const string Staging = ".update";
+
+    private static bool SameFiles(InstalledRecord record, ManifestModel listed) =>
+        listed.Variants.TryGetValue(record.Quantisation, out ManifestFile? weights)
+        && record.Files.GetValueOrDefault(record.Quantisation + ".onnx") == weights.Sha256
+        && record.Files.GetValueOrDefault("meta.json") == listed.Meta.Sha256;
 
     private static bool Sized(string path, ManifestFile expected)
     {

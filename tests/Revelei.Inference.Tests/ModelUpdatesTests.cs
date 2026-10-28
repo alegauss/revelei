@@ -77,6 +77,51 @@ public sealed class ModelUpdatesTests : IDisposable
         Assert.Equal(written.AddDays(-1), File.GetLastWriteTimeUtc(path));
     }
 
+    [Fact]
+    public async Task AVerifiedUpdateReplacesTheFilesAndLeavesNoStaging()
+    {
+        await Download(Catalog("1", ("tiny-x4", "weights"u8.ToArray())));
+        ModelManifest fixedCatalog = Catalog("2", ("tiny-x4", "fixed weights"u8.ToArray()));
+        using HttpClient http = new(new Served(served));
+
+        DownloadResult result = await ModelUpdates.UpdateAsync(http, fixedCatalog, root, "tiny-x4", null, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, result.Fetched);
+        Assert.Equal("fixed weights"u8.ToArray(), await File.ReadAllBytesAsync(Path.Combine(root, "tiny-x4", "fp32.onnx"), TestContext.Current.CancellationToken));
+        Assert.False(Directory.Exists(Path.Combine(root, "tiny-x4", ModelUpdates.Staging)));
+        Assert.Equal(UpdateState.UpToDate, ModelUpdates.State(fixedCatalog, root, "tiny-x4"));
+        Assert.Equal([("tiny-x4", UpdateState.UpToDate)], ModelUpdates.States(fixedCatalog, root));
+    }
+
+    [Fact]
+    public async Task AFailedUpdateLeavesTheWorkingModelAsItWas()
+    {
+        ModelManifest working = Catalog("1", ("tiny-x4", "weights"u8.ToArray()));
+        await Download(working);
+        ModelManifest fixedCatalog = Catalog("2", ("tiny-x4", "fixed weights"u8.ToArray()));
+        served[fixedCatalog.Model("tiny-x4")!.Variants["fp32"].Url] = "tampered!!!!!"u8.ToArray();
+        using HttpClient http = new(new Served(served));
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => ModelUpdates.UpdateAsync(http, fixedCatalog, root, "tiny-x4", null, TestContext.Current.CancellationToken));
+
+        Assert.Equal("weights"u8.ToArray(), await File.ReadAllBytesAsync(Path.Combine(root, "tiny-x4", "fp32.onnx"), TestContext.Current.CancellationToken));
+        Assert.Equal(UpdateState.UpToDate, ModelUpdates.State(working, root, "tiny-x4"));
+        Assert.Equal(UpdateState.UpdateAvailable, ModelUpdates.State(fixedCatalog, root, "tiny-x4"));
+    }
+
+    [Fact]
+    public async Task AVersionBumpWithTheSameFilesFetchesNothing()
+    {
+        await Download(Catalog("1", ("tiny-x4", "weights"u8.ToArray())));
+        ModelManifest bumped = Catalog("2", ("tiny-x4", "weights"u8.ToArray()));
+        using HttpClient http = new(new Served(served));
+
+        DownloadResult result = await ModelUpdates.UpdateAsync(http, bumped, root, "tiny-x4", null, TestContext.Current.CancellationToken);
+
+        Assert.Equal(new DownloadResult(0, 0), result);
+        Assert.Equal(UpdateState.UpToDate, ModelUpdates.State(bumped, root, "tiny-x4"));
+    }
+
     private async Task Download(ModelManifest catalog)
     {
         using HttpClient http = new(new Served(served));

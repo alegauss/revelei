@@ -29,6 +29,7 @@ public sealed class ModelCatalogTests : IDisposable
         Assert.Equal(("2", ModelKind.Onnx, false), (upscale.ModelVersion, upscale.Kind, upscale.NonCommercial));
         Assert.Equal("https://host/tiny-x4-fp32.onnx", upscale.Variants["fp32"].Url);
         Assert.Equal(new ManifestMemory(1 << 20, 2 << 20), upscale.Quantisations!["fp32"].Memory);
+        Assert.Equal("Sharper edges on text.", upscale.Note);
 
         ManifestModel diffusion = Assert.IsType<ManifestModel>(catalog.Model("tiny-diffusion"));
         Assert.Equal((ModelKind.Diffusion, true), (diffusion.Kind, diffusion.NonCommercial));
@@ -167,6 +168,7 @@ public sealed class ModelCatalogTests : IDisposable
                     },
                 },
                 license = "BSD-3-Clause",
+                note = "Sharper edges on text.",
             },
             new
             {

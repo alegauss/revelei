@@ -47,6 +47,7 @@ public enum ModelKind
 /// <param name="Kind">PB70: what runs it.</param>
 /// <param name="NonCommercial">PB70: whether its license forbids commercial use.</param>
 /// <param name="Quantisations">PB70: every way to download it; schema 1's variants read as weights alone.</param>
+/// <param name="Note">PB71: one line on what this version changed, which an update shows.</param>
 public sealed record ManifestModel(
     string Name,
     ManifestFile Meta,
@@ -55,7 +56,8 @@ public sealed record ManifestModel(
     string? ModelVersion = null,
     ModelKind Kind = ModelKind.Onnx,
     bool NonCommercial = false,
-    IReadOnlyDictionary<string, ManifestQuantisation>? Quantisations = null);
+    IReadOnlyDictionary<string, ManifestQuantisation>? Quantisations = null,
+    string? Note = null);
 
 /// <summary>
 /// scripts/build-manifest.py's manifest.json (PB12), schema 1, or the catalog PB70 publishes at a
@@ -142,7 +144,8 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
         ManifestFile Meta,
         IReadOnlyDictionary<string, ManifestQuantisation> Quantisations,
         string License,
-        bool NonCommercial = false)
+        bool NonCommercial = false,
+        string? Note = null)
     {
         public ManifestModel Read()
         {
@@ -164,7 +167,7 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
                 }
             }
 
-            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations);
+            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations, Note);
         }
     }
 

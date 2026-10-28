@@ -28,23 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB71 Model updates without breaking what works
-
-Each downloaded model gets an `installed.json` beside its files: the catalog version,
-the quantisation chosen, the date, and the hashes of what was fetched. Comparing it with
-the refreshed catalog (PB70) gives three states per model: up to date, update available,
-and withdrawn (the catalog no longer lists it, which keeps working but is labelled).
-
-An update downloads the new files next to the old ones (`<model>/<version>/`), verifies
-them, and only then switches the pointer and deletes the old version, so a failed or
-paused update leaves the working model untouched and an operation running on it is never
-pulled out from under. The panel names what changed from the catalog's one-line note and
-the size of the update; nothing is updated without the person pressing Update, except an
-optional "Update automatically" switch that is off by default.
-
-Models the installer carries are updated by a new installer, not here; the panel says so
-rather than offering an update it cannot apply in Program Files.
-
 ### §PB72 A hardware verdict per model and quantisation
 
 The machine is already half measured: `GpuAdapters` reads each GPU's dedicated video
@@ -105,10 +88,12 @@ and Updates.
 Each card shows: name and one-line description; size on disk and to download; the
 license, with a plain "non-commercial" badge where it applies; the hardware verdict
 (PB72) and the recommended quantisation, with a picker for the others and the verdict of
-each; the installed version and, when there is one, the update and what it changes
-(PB71); and the actions Download, Pause, Resume, Cancel, Update and Remove, all going
-through the queue (PB73). The footer shows the location and free space (PB74), Check now
-with the catalog date (PB70), and the queue.
+each; the installed version and, when there is one, the update, its size and the
+catalog's one-line note (`ModelUpdates.State`, `UpdateAsync`), with an "Update
+automatically" switch off by default, a Withdrawn label, and no update offered for the
+installer's models; and the actions Download, Pause, Resume, Cancel, Update and Remove,
+all going through the queue (PB73). The footer shows the location and free space (PB74),
+Check now with the catalog date (PB70), and the queue.
 
 About keeps the version, the notices and a one-line "N models installed, X GB" that
 opens this panel. The first-use cards of Restore faces and Remove background keep their
