@@ -1,0 +1,2 @@
+# PB70: a signature covers exact bytes, so no checkout may rewrite these line endings.
+tests/fixtures/catalog/** -text

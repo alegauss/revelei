@@ -20,5 +20,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
+- ⏸ **PB84** (deps: —) **No signed catalog is published and the app trusts no key, so a refresh always keeps the embedded copy** — set aside (Needs the owner's key and upload.): The signing key is the owner's to create and keep, and publishing to Hugging Face is theirs; the code on both sides is in place. → §PB84
+
 ## Block J — Generate an image from a prompt
 

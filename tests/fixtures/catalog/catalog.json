@@ -1,0 +1,63 @@
+{
+  "schema": 2,
+  "version": "fixture",
+  "sequence": 7,
+  "models": [
+    {
+      "name": "tiny-x4",
+      "version": "1",
+      "kind": "onnx",
+      "task": "upscale",
+      "meta": {
+        "url": "https://host/tiny-x4-meta.json",
+        "bytes": 10,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "quantisations": {
+        "fp32": {
+          "files": [
+            {
+              "role": "weights",
+              "file": {
+                "url": "https://host/tiny-x4-fp32.onnx",
+                "bytes": 1048576,
+                "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            }
+          ]
+        }
+      },
+      "license": "BSD-3-Clause",
+      "license_url": "https://host/LICENSE",
+      "non_commercial": false
+    },
+    {
+      "name": "tiny-matte",
+      "version": "1",
+      "kind": "onnx",
+      "task": "background-removal",
+      "meta": {
+        "url": "https://host/tiny-matte-meta.json",
+        "bytes": 10,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "quantisations": {
+        "fp32": {
+          "files": [
+            {
+              "role": "weights",
+              "file": {
+                "url": "https://host/tiny-matte-fp32.onnx",
+                "bytes": 2048,
+                "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            }
+          ]
+        }
+      },
+      "license": "bria-rmbg-1.4 (non-commercial)",
+      "license_url": "https://host/LICENSE",
+      "non_commercial": true
+    }
+  ]
+}

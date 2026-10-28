@@ -115,6 +115,23 @@ public sealed class ModelCatalogTests : IDisposable
         Assert.StartsWith("The catalog could not be fetched", refresh.Kept, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ACatalogBuiltAndSignedByTheScriptsVerifiesHere()
+    {
+        // scripts/build-manifest.py wrote it and scripts/sign-catalog.py signed it with a throwaway key.
+        string fixture = Path.Combine(Repository.Root, "tests", "fixtures", "catalog");
+        byte[] body = System.IO.File.ReadAllBytes(Path.Combine(fixture, "catalog.json"));
+        string signature = System.IO.File.ReadAllText(Path.Combine(fixture, "catalog.json.sig"));
+        string publicKey = System.IO.File.ReadAllText(Path.Combine(fixture, "public-key.txt")).Trim();
+
+        ModelManifest catalog = ModelCatalog.Accept(body, signature, publicKey, Floor(7));
+
+        Assert.Equal(7, catalog.Sequence);
+        Assert.Equal(("1", false), (catalog.Model("tiny-x4")!.ModelVersion, catalog.Model("tiny-x4")!.NonCommercial));
+        Assert.True(catalog.Model("tiny-matte")!.NonCommercial);
+        Assert.Equal(2048, catalog.Model("tiny-matte")!.Variants["fp32"].Bytes);
+    }
+
     private static async Task<CatalogRefresh> Refresh(byte[] body, byte[] signature, string publicKey, ModelManifest floor)
     {
         using HttpClient http = new(new Served(new() { [Address.AbsoluteUri] = body, [Address.AbsoluteUri + ".sig"] = signature }));

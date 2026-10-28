@@ -16,3 +16,5 @@ transformers==5.20.2
 safetensors==0.8.0
 # PB12: scripts/publish-models.py uploads the FP32 set to Hugging Face.
 huggingface-hub==2.2.0
+# PB70: scripts/sign-catalog.py signs the catalog the app refreshes from.
+cryptography==50.0.2

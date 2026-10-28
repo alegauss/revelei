@@ -28,30 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB70 A catalog the app can refresh
-
-Today `ModelDownloads.Embedded` is the whole world: schema 1, one variant (fp32) per
-model, pinned to a resolve/<commit>/ URL. That pinning is what lets the app trust every
-byte without the network, and it must survive.
-
-The catalog becomes schema 2, published beside the models on Hugging Face at a stable
-path, and the app keeps embedding the copy it was built with as the fallback and the
-floor. A fetched catalog is used only when (a) its ECDSA P-256 (.NET has no Ed25519)
-signature verifies against a public key compiled into the app, and (b) its sequence
-number is not lower than the embedded one, so a stale or replayed file can never roll a
-model back. Every file inside it is still a resolve/<commit>/ URL with size and SHA-256,
-so the trust per file is unchanged.
-
-Schema 2 adds, per model: a version, a kind (`onnx` for today's operations, `diffusion`
-for block J), a list of files with roles (weights, text encoder, VAE) instead of one
-ONNX per variant, several quantisations to choose from, the memory each needs to run
-(read by the hardware-fit verdict), the license and whether it is non-commercial. The
-app reads schema 1 and 2 until the embedded copy moves to 2.
-
-The fetch happens only when the Models panel opens or the person presses Check now,
-never in the background at launch, and only the catalog is fetched: no photo, prompt or
-identifier leaves the PC.
-
 ### §PB71 Model updates without breaking what works
 
 Each downloaded model gets an `installed.json` beside its files: the catalog version,
@@ -155,6 +131,27 @@ uses the same code path.
 
 An idea for now: its shape depends on what the generation engine reports per step, which
 the engine spike in block J settles.
+
+### §PB84 Publish the first signed catalog
+
+PB70 left the app able to read schema 2 and take a fetched catalog only when it is
+signed and not older than the embedded copy (`ModelCatalog` in Revelei.Inference), and
+left the scripts able to write one (`build-manifest.py --sequence`) and sign it
+(`sign-catalog.py`). Nothing is published, and the app compiles in neither key nor URL.
+
+What the owner does, once:
+
+1. `sign-catalog.py --new-key %USERPROFILE%\.revelei\catalog-key.pem`, kept out of the
+   repository and backed up: losing it means the next release must ship a new public key.
+2. Compile the printed public key and the stable catalog URL
+   (`resolve/main/catalog.json` in alegauss/photo-boost-models) into `ModelCatalog`, with a
+   test that the published file verifies against that key.
+3. Build with `--sequence 1`, sign, and have `publish-models.py` upload catalog.json and
+   catalog.json.sig to that path; record the sequence in published-models.json.
+4. Embed that catalog as the floor in place of the schema 1 manifest, so
+   `ModelDownloads.Embedded.Sequence` is the replay floor the refresh compares against.
+
+The refresh is wired to a button by PB75's Models panel, never at launch.
 
 ## Block J — Generate an image from a prompt
 

@@ -63,6 +63,20 @@ class BuildManifestTests(unittest.TestCase):
         with self.assertRaises(bm.ManifestError):
             bm.build(self.models, self.stage, "https://host", "1")
 
+    def test_the_catalog_is_schema_2_with_weights_by_quantisation(self):
+        # PB70: the same models, each with a version, a kind and its variants as weights files.
+        manifest = bm.build(self.models, self.stage, "https://host", "1")
+        catalog = bm.catalog(manifest, 3, versions={"tiny-x4": "2"})
+        model = catalog["models"][0]
+        self.assertEqual((2, 3), (catalog["schema"], catalog["sequence"]))
+        self.assertEqual(("2", "onnx", False), (model["version"], model["kind"], model["non_commercial"]))
+        self.assertEqual([{"role": "weights", "file": manifest["models"][0]["variants"]["fp32"]}], model["quantisations"]["fp32"]["files"])
+
+    def test_a_catalog_sequence_below_1_is_refused(self):
+        manifest = bm.build(self.models, self.stage, "https://host", "1")
+        with self.assertRaises(bm.ManifestError):
+            bm.catalog(manifest, 0)
+
     def test_no_models_is_refused(self):
         with self.assertRaises(bm.ManifestError):
             bm.build(self.stage, self.stage, "https://host", "1")
