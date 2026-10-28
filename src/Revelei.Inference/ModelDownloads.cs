@@ -322,10 +322,17 @@ public static class ModelDownloads
         long total = TotalBytes(manifest, models);
         long done = 0;
         int fetched = 0, present = 0;
+        HashSet<string> atRoot = new(StringComparer.OrdinalIgnoreCase), fetchedNow = new(StringComparer.OrdinalIgnoreCase);
         Speed speed = new();
         foreach ((string path, string label, ManifestFile expected) in Files(manifest, root, models))
         {
-            if (Present(path, label, expected, elsewhere))
+            bool here = Valid(path, expected);
+            if (here)
+            {
+                atRoot.Add(path);
+            }
+
+            if (here || (elsewhere ?? []).Any(other => Valid(Path.Combine(other, label), expected)))
             {
                 present++;
                 done += expected.Bytes;
@@ -360,10 +367,13 @@ public static class ModelDownloads
             }
 
             File.Move(part, path, overwrite: true);
+            atRoot.Add(path);
+            fetchedNow.Add(path);
             fetched++;
             done = before + expected.Bytes;
         }
 
+        Record(manifest, root, models, atRoot, fetchedNow);
         return new DownloadResult(fetched, present);
     }
 
@@ -419,6 +429,26 @@ public static class ModelDownloads
         catch (OperationCanceledException silent) when (!cancellation.IsCancellationRequested)
         {
             throw new IOException($"The connection went silent for {StallTimeout.TotalSeconds:0} seconds.", silent);
+        }
+    }
+
+    // PB71: installed.json for each model whose files are all in the download folder, written
+    // when one of them was fetched now or the folder has no record yet, so an update can be told.
+    private static void Record(ModelManifest manifest, string root, IReadOnlyCollection<string>? models, HashSet<string> atRoot, HashSet<string> fetchedNow)
+    {
+        foreach (ManifestModel model in Selected(manifest, models))
+        {
+            string[] paths = [.. Files(manifest, root, [model.Name]).Select(f => f.Path)];
+            string folder = Path.Combine(root, model.Name);
+            if (!model.Variants.TryGetValue(Variant, out ManifestFile? weights)
+                || !paths.All(atRoot.Contains)
+                || (!paths.Any(fetchedNow.Contains) && InstalledRecord.Read(folder) is not null))
+            {
+                continue;
+            }
+
+            Dictionary<string, string> files = new(StringComparer.Ordinal) { [Variant + ".onnx"] = weights.Sha256, ["meta.json"] = model.Meta.Sha256 };
+            new InstalledRecord(ModelUpdates.VersionOf(model), Variant, DateTimeOffset.Now, files).Write(folder);
         }
     }
 

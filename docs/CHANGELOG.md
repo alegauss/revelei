@@ -95,6 +95,7 @@
 ## Block I — Model manager: catalog, updates and hardware fit
 
 - ✅ **PB70** **The downloadable models are fixed at build time, so a new model or a fixed file needs a new Revelei release** — build-manifest.py writes a schema 2 catalog, sign-catalog.py signs it, the app verifies it; publishing is PB84 (design recorded in `src/Revelei.Inference/ModelCatalog.cs`).
+- ✅ **PB71 (installed.json and update state)** **An installed model is never known to be out of date, so a fixed or improved version is never offered** — A download writes installed.json, and each model reads as up to date, update available or withdrawn against the catalog.
 
 ## Block J — Generate an image from a prompt
 
