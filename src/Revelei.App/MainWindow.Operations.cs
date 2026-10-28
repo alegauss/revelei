@@ -86,7 +86,7 @@ public partial class MainWindow
         bool installed = HighQualityInstalled();
         QualityHigh.IsEnabled = installed || QualityHigh.IsChecked == true;
         QualityNote.Text = !installed
-            ? "High quality needs the FP32 models: download them in About."
+            ? "High quality needs the FP32 models: download them in Models."
             : Provider?.Provider == ExecutionProvider.Cpu
                 ? "High quality uses the FP32 models, which on this PC's CPU are also about twice as fast."
                 : "High quality uses the FP32 models; on the GPU both run at about the same speed.";

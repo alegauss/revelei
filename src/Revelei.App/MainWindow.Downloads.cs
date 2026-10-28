@@ -5,22 +5,9 @@ using Revelei.Inference;
 
 namespace Revelei.App;
 
-/// <summary>A downloaded model as About lists it (PB58), with what it takes on disk.</summary>
-/// <param name="Name">Its folder name.</param>
-/// <param name="Label">What the row says.</param>
-public sealed record DownloadedModel(string Name, string Label)
-{
-    /// <summary>The Remove button's automation id.</summary>
-    public string RemoveId => $"Remove-{Name}";
-
-    /// <summary>The Remove button's accessible name.</summary>
-    public string RemoveName => $"Remove {Name}";
-}
-
 /// <summary>
-/// The Downloads block of the About panel (PB13, PB58): every model downloaded so far with the
-/// disk it takes, each removable, and every model the manifest lists at once, the optional FP32
-/// set included, for working offline. Each file is checked against its SHA-256 before anything
+/// The everything-at-once block of the Models panel (PB13, PB58, PB75): every model the manifest
+/// lists at once, the optional FP32 set included, for working offline; each card removes its own. Each file is checked against its SHA-256 before anything
 /// loads it, and the installer's models keep working whether or not this ever runs.
 /// </summary>
 public partial class MainWindow
@@ -51,30 +38,6 @@ public partial class MainWindow
             : "Restore faces and Remove background download their models the first time you use them. "
                 + $"To work offline from the start, download everything now: {DownloadText.Size(left)}, the high-quality (FP32) models included.{cpu}";
         DownloadModelsButton.IsEnabled = downloading is null && left > 0;
-
-        List<DownloadedModel> rows = [.. Downloaded()];
-        DownloadedModels.ItemsSource = rows;
-        DownloadedModels.IsEnabled = !Busy && downloading is null && !FirstUseDownloading;
-        DownloadedModels.Visibility = rows.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-    }
-
-    /// <summary>The model folders in the download folder, partly downloaded ones included, so the disk they take is never hidden.</summary>
-    private IEnumerable<DownloadedModel> Downloaded()
-    {
-        if (!Directory.Exists(Options.ModelsFolder) || Options.ModelFolders.Count == 1)
-        {
-            // With --models alone there is no download folder of its own to tidy: it is the only one.
-            yield break;
-        }
-
-        // PB73: .shared holds files models share by SHA-256, and is not a model of its own.
-        foreach (DirectoryInfo folder in new DirectoryInfo(Options.ModelsFolder).EnumerateDirectories().Where(d => !d.Name.StartsWith('.')).OrderBy(d => d.Name, StringComparer.Ordinal))
-        {
-            FileInfo[] files = folder.GetFiles("*", SearchOption.AllDirectories);
-            long bytes = files.Sum(f => f.Length);
-            bool partial = files.Any(f => f.Name.EndsWith(".part", StringComparison.Ordinal));
-            yield return new(folder.Name, $"{folder.Name} · {DownloadText.Size(bytes)}{(partial ? ", partly downloaded" : string.Empty)}");
-        }
     }
 
     /// <summary>Whether every installed model has its FP32 variant on disk.</summary>
@@ -142,6 +105,11 @@ public partial class MainWindow
             CancelDownloadButton.Visibility = Visibility.Collapsed;
             DownloadProgressBar.Visibility = Visibility.Collapsed;
             FillAbout();
+            if (ModelsPanel.Visibility == Visibility.Visible)
+            {
+                FillModels();
+            }
+
             RefreshOperations();
         }
     }
@@ -169,6 +137,11 @@ public partial class MainWindow
         }
 
         FillAbout();
+        if (ModelsPanel.Visibility == Visibility.Visible)
+        {
+            FillModels();
+        }
+
         RefreshOperations();
     }
 }

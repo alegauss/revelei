@@ -157,7 +157,7 @@ public partial class MainWindow
             : $"Total: {DownloadText.Size(total)}.") + FreeSpace(missing);
         ConsentFacts.Text = string.Join(Environment.NewLine,
             "• Only the models are downloaded. Your photo stays on this PC and is never uploaded.",
-            $"• They are saved in {Options.ModelsFolder}, and About can remove them at any time.",
+            $"• They are saved in {Options.ModelsFolder}, and the Models panel can remove them at any time.",
             "• Each file is checked against its published SHA-256 before it is used; a damaged one is deleted.",
             "• Revelei keeps working while it downloads. You can pause it, and it resumes where it stopped.",
             $"• Once the download is verified, {card.Operation.Title} starts on this photo by itself.");
@@ -168,6 +168,11 @@ public partial class MainWindow
         if (AboutPanel.Visibility == Visibility.Visible)
         {
             OnAboutClick(this, new RoutedEventArgs());
+        }
+
+        if (ModelsPanel.Visibility == Visibility.Visible)
+        {
+            OnModelsClick(this, new RoutedEventArgs());
         }
 
         ConsentPanel.Visibility = Visibility.Visible;

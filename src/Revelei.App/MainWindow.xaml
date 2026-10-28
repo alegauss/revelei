@@ -70,8 +70,12 @@
         </Border>
       </StatusBarItem>
       <!-- PB46: the version, each model's license and the third-party notices. -->
+      <!-- PB75: the Models panel, every catalog model as a card. -->
       <StatusBarItem HorizontalAlignment="Right">
-        <Button x:Name="AboutButton" AutomationProperties.AutomationId="AboutButton" Content="About" Padding="10,2" Click="OnAboutClick" />
+        <StackPanel Orientation="Horizontal">
+          <Button x:Name="ModelsButton" AutomationProperties.AutomationId="ModelsButton" Content="Models" Padding="10,2" Margin="0,0,6,0" Click="OnModelsClick" />
+          <Button x:Name="AboutButton" AutomationProperties.AutomationId="AboutButton" Content="About" Padding="10,2" Click="OnAboutClick" />
+        </StackPanel>
       </StatusBarItem>
     </StatusBar>
 
@@ -422,23 +426,71 @@
             <TextBlock Text="GFPGAN v1.4 and RMBG-1.4 are licensed for non-commercial use only; check each license before using results commercially."
                        Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,6,0,16" />
 
-            <!-- PB13, PB58: what was downloaded and the disk it takes, each removable, and every
-                 model at once for working offline, the optional FP32 set included. -->
-            <TextBlock Text="Downloads" Style="{StaticResource SectionHeader}" Margin="0,0,0,6" />
-            <TextBlock x:Name="DownloadNote" AutomationProperties.AutomationId="DownloadNote"
-                       Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,0,0,6" />
-            <ItemsControl x:Name="DownloadedModels" AutomationProperties.AutomationId="DownloadedModels" Margin="0,0,0,6">
+            <!-- PB75: the downloads moved to the Models panel; About says what is installed and opens it. -->
+            <DockPanel Margin="0,0,0,16">
+              <Button x:Name="AboutOpenModels" AutomationProperties.AutomationId="AboutOpenModels" DockPanel.Dock="Right"
+                      Content="Manage models" Padding="12,4" Click="OnModelsClick" />
+              <TextBlock x:Name="AboutInstalled" AutomationProperties.AutomationId="AboutInstalled"
+                         Style="{StaticResource StatCaption}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </DockPanel>
+
+            <TextBlock Text="Third-party software" Style="{StaticResource SectionHeader}" Margin="0,0,0,6" />
+            <TextBlock x:Name="AboutNotices" AutomationProperties.AutomationId="AboutNotices"
+                       Style="{StaticResource StatCaption}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+      </ScrollViewer>
+
+      <!-- PB75: the Models panel takes the stage's place, as About does: every catalog model as a
+           card, filterable, with its verdict, version and actions, all going through the queue. -->
+      <ScrollViewer x:Name="ModelsPanel" AutomationProperties.AutomationId="ModelsPanel" Visibility="Collapsed"
+                    VerticalScrollBarVisibility="Auto">
+        <Border Style="{StaticResource GroupCard}" Padding="24" MaxWidth="860" HorizontalAlignment="Center" VerticalAlignment="Top">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,8">
+              <Button x:Name="ModelsClose" AutomationProperties.AutomationId="ModelsClose" DockPanel.Dock="Right"
+                      Content="Close" Padding="12,4" Click="OnModelsClick" />
+              <TextBlock Text="Models" Style="{StaticResource StatValue}" VerticalAlignment="Center" />
+            </DockPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <RadioButton x:Name="ModelsFilterAll" AutomationProperties.AutomationId="ModelsFilterAll" Content="All" GroupName="ModelsFilter" IsChecked="True" Margin="0,0,12,0" Checked="OnModelsFilterChecked" />
+              <RadioButton x:Name="ModelsFilterInstalled" AutomationProperties.AutomationId="ModelsFilterInstalled" Content="Installed" GroupName="ModelsFilter" Margin="0,0,12,0" Checked="OnModelsFilterChecked" />
+              <RadioButton x:Name="ModelsFilterAvailable" AutomationProperties.AutomationId="ModelsFilterAvailable" Content="Available" GroupName="ModelsFilter" Margin="0,0,12,0" Checked="OnModelsFilterChecked" />
+              <RadioButton x:Name="ModelsFilterUpdates" AutomationProperties.AutomationId="ModelsFilterUpdates" Content="Updates" GroupName="ModelsFilter" Checked="OnModelsFilterChecked" />
+            </StackPanel>
+
+            <ItemsControl x:Name="ModelCardList" AutomationProperties.AutomationId="ModelCardList" Margin="0,0,0,12">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <DockPanel Margin="0,2">
-                    <Button DockPanel.Dock="Right" Content="Remove" Padding="10,2" Tag="{Binding Name}"
-                            AutomationProperties.AutomationId="{Binding RemoveId}" AutomationProperties.Name="{Binding RemoveName}"
-                            Click="OnRemoveModelClick" />
-                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" VerticalAlignment="Center" />
-                  </DockPanel>
+                  <Border Style="{StaticResource GroupCard}" Padding="12" Margin="0,0,0,8">
+                    <DockPanel>
+                      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                        <Button Content="{Binding DownloadLabel}" Padding="10,2" Margin="6,0,0,0" Tag="{Binding Name}" Visibility="{Binding DownloadVisibility}"
+                                AutomationProperties.AutomationId="{Binding DownloadId}" AutomationProperties.Name="{Binding DownloadName}" Click="OnCardDownloadClick" />
+                        <Button Content="{Binding PauseLabel}" Padding="10,2" Margin="6,0,0,0" Tag="{Binding Name}" Visibility="{Binding QueuedVisibility}"
+                                AutomationProperties.AutomationId="{Binding PauseId}" Click="OnCardPauseClick" />
+                        <Button Content="Cancel" Padding="10,2" Margin="6,0,0,0" Tag="{Binding Name}" Visibility="{Binding QueuedVisibility}"
+                                AutomationProperties.AutomationId="{Binding CancelId}" Click="OnCardCancelClick" />
+                        <Button Content="Remove" Padding="10,2" Margin="6,0,0,0" Tag="{Binding Name}" Visibility="{Binding RemoveVisibility}"
+                                AutomationProperties.AutomationId="{Binding RemoveId}" AutomationProperties.Name="{Binding RemoveName}" Click="OnRemoveModelClick" />
+                      </StackPanel>
+                      <StackPanel>
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" AutomationProperties.AutomationId="{Binding TitleId}" />
+                        <TextBlock Text="{Binding Detail}" Style="{StaticResource StatCaption}" TextWrapping="Wrap" AutomationProperties.AutomationId="{Binding DetailId}" />
+                        <TextBlock Text="{Binding Fit}" Style="{StaticResource StatCaption}" TextWrapping="Wrap" AutomationProperties.AutomationId="{Binding FitId}" />
+                        <TextBlock Text="{Binding Status}" Style="{StaticResource StatCaption}" TextWrapping="Wrap" AutomationProperties.AutomationId="{Binding StatusId}" />
+                      </StackPanel>
+                    </DockPanel>
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <!-- PB13, PB58: what was downloaded and the disk it takes, each removable, and every
+                 model at once for working offline, the optional FP32 set included. -->
+            <TextBlock Text="Everything at once" Style="{StaticResource SectionHeader}" Margin="0,0,0,6" />
+            <TextBlock x:Name="DownloadNote" AutomationProperties.AutomationId="DownloadNote"
+                       Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,0,0,6" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
               <Button x:Name="DownloadModelsButton" AutomationProperties.AutomationId="DownloadModelsButton"
                       Content="Download everything" Padding="12,4" Click="OnDownloadModelsClick" />
@@ -450,9 +502,13 @@
             <TextBlock x:Name="DownloadStatus" AutomationProperties.AutomationId="DownloadStatus"
                        Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,0,0,16" />
 
-            <TextBlock Text="Third-party software" Style="{StaticResource SectionHeader}" Margin="0,0,0,6" />
-            <TextBlock x:Name="AboutNotices" AutomationProperties.AutomationId="AboutNotices"
-                       Style="{StaticResource StatCaption}" TextWrapping="Wrap" />
+            <!-- PB74: where downloads live, what is free there, and a way to move them. -->
+            <DockPanel Margin="0,0,0,6">
+              <Button x:Name="ModelsChangeFolder" AutomationProperties.AutomationId="ModelsChangeFolder" DockPanel.Dock="Right"
+                      Content="Change folder" Padding="12,4" Click="OnModelsChangeFolderClick" />
+              <TextBlock x:Name="ModelsLocation" AutomationProperties.AutomationId="ModelsLocation"
+                         Style="{StaticResource StatCaption}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            </DockPanel>
           </StackPanel>
         </Border>
       </ScrollViewer>

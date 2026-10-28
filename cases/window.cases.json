@@ -542,16 +542,16 @@
     {
       // PB13, PB58: only the offer is read; the download itself needs the network, which a case
       // does not reach, and ModelDownloadsTests drives it against a stand-in server.
-      "name": "with no models About offers to download everything",
-      "catches": "an About panel that hides the downloads, or offers them disabled",
-      "filed": "PB13",
-      "tags": ["about", "download"],
+      "name": "with no models the Models panel offers to download everything",
+      "catches": "a Models panel that hides the downloads, or offers them disabled",
+      "filed": "PB13, PB75",
+      "tags": ["models", "download"],
       "fixture": "a window with a photo open and no models",
       "steps": [
         {
-          "locator": "Button#AboutButton",
+          "locator": "Button#ModelsButton",
           "act": "invoke",
-          "named": "About is opened"
+          "named": "the Models panel is opened"
         },
         {
           "locator": "Text#DownloadNote",
@@ -568,9 +568,9 @@
           "named": "and offers it"
         },
         {
-          "locator": "Button#AboutClose",
+          "locator": "Button#ModelsClose",
           "act": "invoke",
-          "named": "About is closed"
+          "named": "the Models panel is closed"
         }
       ]
     },
@@ -677,7 +677,7 @@
           "locator": "Text#QualityNote",
           "act": "read",
           "reads": "name",
-          "expect": "High quality needs the FP32 models: download them in About.",
+          "expect": "High quality needs the FP32 models: download them in Models.",
           "named": "and the note says where to get it"
         }
       ]

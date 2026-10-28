@@ -17,6 +17,11 @@ public partial class MainWindow
         bool opening = AboutPanel.Visibility != Visibility.Visible;
         if (opening)
         {
+            if (ModelsPanel.Visibility == Visibility.Visible)
+            {
+                OnModelsClick(this, new RoutedEventArgs());
+            }
+
             FillAbout();
             ConsentPanel.Visibility = Visibility.Collapsed; // About replaces an unanswered offer; the card still has it.
             consenting = null;
@@ -49,6 +54,12 @@ public partial class MainWindow
         AboutModels.ItemsSource = installed.Count == 0
             ? ["No models yet. Download them to use the operations."]
             : installed.Select(Describe).ToList();
+        // PB75: a line on what is installed; the Models panel manages them.
+        int downloaded = ModelUpdates.States(Manifest, Options.ModelsFolder).Count;
+        long disk = Directory.Exists(Options.ModelsFolder)
+            ? new DirectoryInfo(Options.ModelsFolder).GetFiles("*", SearchOption.AllDirectories).Sum(f => f.Length)
+            : 0;
+        AboutInstalled.Text = $"{installed.Count} models installed, {downloaded} of them downloaded ({DownloadText.Size(disk)}).";
         AboutNotices.Text = Notices();
         RefreshDownloads();
     }

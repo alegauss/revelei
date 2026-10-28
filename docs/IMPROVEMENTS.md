@@ -28,30 +28,6 @@ mirroring, this line is retired.
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-### §PB75 The Models panel
-
-A Models button beside About opens a panel that replaces the Downloads block of About
-(`MainWindow.Downloads.cs`). It lists every catalog model as a card, grouped by what it
-does (Upscale, Faces, Background, Denoise, Generate), filterable by Installed, Available
-and Updates.
-
-Each card shows: name and one-line description; size on disk and to download; the
-license, with a plain "non-commercial" badge where it applies; the hardware verdict
-(PB72) and the recommended quantisation, with a picker for the others and the verdict of
-each; the installed version and, when there is one, the update, its size and the
-catalog's one-line note (`ModelUpdates.State`, `UpdateAsync`), with an "Update
-automatically" switch off by default, a Withdrawn label, and no update offered for the
-installer's models; and the actions Download, Pause, Resume, Cancel, Update and Remove,
-all going through the queue (PB73). The footer shows the location and free space with a
-Change button that runs `ModelsFolderMove` and saves `AppSettings` (PB74), Check now
-with the catalog date (PB70), and the queue.
-
-About keeps the version, the notices and a one-line "N models installed, X GB" that
-opens this panel. The first-use cards of Restore faces and Remove background keep their
-consent panel. Every control has an AutomationId, and the winwright cases in
-`cases/download.cases.json` move to the new panel, served by the existing fixture server
-with a schema 2 fixture catalog.
-
 ### §PB76 Measured speed replaces the estimate
 
 Every run already logs its duration (`OperationLog`). Keep, per model, quantisation and
@@ -87,7 +63,28 @@ What the owner does, once:
 4. Embed that catalog as the floor in place of the schema 1 manifest, so
    `ModelDownloads.Embedded.Sequence` is the replay floor the refresh compares against.
 
-The refresh is wired to a button by PB75's Models panel, never at launch.
+Then the Models panel (PB75) gets Check now with the catalog's date, which runs
+`ModelCatalog.RefreshAsync` and rebuilds the cards, never at launch, and an "Update
+automatically" switch, off by default, that queues every card offering Update after a
+refresh.
+
+### §PB85 A quantisation picker on each card
+
+PB75's card shows the quantisation `HardwareFit.Recommend` picked (or the one installed)
+and its verdict, and Download fetches that one. A person who wants the larger, slower
+one on an 8 GB card, or the smaller one to save disk, cannot choose it.
+
+Add a picker to each card that lists every quantisation the catalog gives the model,
+each with its size and its own `HardwareFit.Judge` verdict, the recommended one first
+and marked. `ModelCardRow` carries the choice; Download enqueues it
+(`DownloadQueue.Enqueue` already takes the quantisation). A model already installed in
+one quantisation shows the others as a switch: download the new one, then remove the old
+(for a diffusion model the shared files the two have in common stay,
+`ModelDownloads.Remove`).
+
+Today's ONNX models list fp32 alone in the catalog, so the picker only appears where the
+catalog lists more than one; the winwright case needs a schema 2 fixture catalog with
+two quantisations, served by the existing fixture server.
 
 ## Block J — Generate an image from a prompt
 

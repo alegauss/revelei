@@ -122,9 +122,9 @@
     },
 
     {
-      "name": "About lists each model with the license its meta.json carries",
-      "catches": "a model's license missing from the app, or the About panel failing to open or close",
-      "filed": "PB46",
+      "name": "About lists each model with the license its meta.json carries, and Models offers the downloads",
+      "catches": "a model's license missing from the app, the About or Models panel failing to open or close, or a Models panel without its cards",
+      "filed": "PB46, PB75",
       "tags": ["about"],
       "fixture": "a window on the tiny models, exporting into its own folder",
       "steps": [
@@ -148,12 +148,46 @@
           "named": "the first model, its variants and its license"
         },
         {
+          // PB75: About says what is installed; the Models panel manages the downloads.
+          "locator": "Text#AboutInstalled",
+          "act": "read",
+          "reads": "name",
+          "matches": "^2 models installed, \\d+ of them downloaded \\(",
+          "named": "About says what is installed"
+        },
+        {
+          "locator": "Button#AboutOpenModels",
+          "act": "invoke",
+          "named": "Manage models opens the Models panel in About's place"
+        },
+        {
+          "locator": "Text#ModelTitle-gfpgan-v1.4",
+          "act": "read",
+          "reads": "name",
+          "expect": "GFPGAN v1.4, the face restorer",
+          "named": "the panel has a card for each catalog model"
+        },
+        {
+          "locator": "Text#ModelDetail-rmbg-1.4",
+          "act": "read",
+          "reads": "name",
+          "matches": "^Background · \\d+ MB to download · fp32 · bria-rmbg-1\\.4 \\(non-commercial\\) · non-commercial$",
+          "named": "with its group, size, license and the non-commercial badge"
+        },
+        {
+          "locator": "Button#Download-rmbg-1.4",
+          "act": "read",
+          "reads": "enabled",
+          "expect": "enabled",
+          "named": "and a Download button for one not on this PC"
+        },
+        {
           // PB58: the tiny upscalers are here, but GFPGAN, RMBG and ViTMatte download on first use.
           "locator": "Text#DownloadNote",
           "act": "read",
           "reads": "name",
           "matches": "^Restore faces and Remove background download their models the first time you use them\\. To work offline from the start, download everything now: ",
-          "named": "About says which operations download on first use"
+          "named": "the panel says which operations download on first use"
         },
         {
           "locator": "Button#DownloadModelsButton",
@@ -163,15 +197,15 @@
           "named": "and offers everything at once"
         },
         {
-          "locator": "Button#AboutClose",
+          "locator": "Button#ModelsClose",
           "act": "invoke",
-          "named": "About is closed"
+          "named": "the Models panel is closed"
         },
         {
-          "locator": "Button#AboutButton",
+          "locator": "Button#ModelsButton",
           "act": "read",
           "reads": "name",
-          "expect": "About",
+          "expect": "Models",
           "named": "and the photo is back"
         }
       ]
