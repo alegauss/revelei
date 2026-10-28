@@ -6,6 +6,7 @@ namespace Revelei.Architecture.Tests;
 /// PB2: the direction of the project references, read out of the .csproj files. Imaging is the
 /// bottom layer, Inference and Render each stand on it alone, and only the app sees all three. A
 /// reference that inverts this fails here rather than in a review somebody has to remember.
+/// PB78: Generation stands on Imaging alone too, and its host process on Generation alone.
 /// </summary>
 public sealed class LayeringTests
 {
@@ -19,6 +20,8 @@ public sealed class LayeringTests
         ["Revelei.Imaging"] = Nothing,
         ["Revelei.Inference"] = ImagingOnly,
         ["Revelei.Render"] = ImagingOnly,
+        ["Revelei.Generation"] = ImagingOnly,
+        ["Revelei.Generation.Host"] = ["Revelei.Generation"],
         ["Revelei.App"] = EveryLayer,
     };
 

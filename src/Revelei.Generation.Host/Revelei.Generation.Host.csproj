@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PB78: the process that owns stable-diffusion.cpp, so a native crash or leak ends here and
+       not in the window. It speaks Revelei.Generation's line protocol on stdin and stdout. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Revelei.Generation.Host</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <!-- The engine's image buffer is read straight from native memory. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Revelei.Generation\Revelei.Generation.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Text-to-image generation (PB78): the request, its progress and the client that drives the
+       engine in Revelei.Generation.Host, a process of its own, so native code that crashes or
+       leaks never takes the window with it. No UI type and no engine type. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Revelei.Generation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Revelei.Imaging\Revelei.Imaging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Revelei.Generation.Host" />
+    <InternalsVisibleTo Include="Revelei.Generation.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -88,29 +88,6 @@ two quantisations, served by the existing fixture server.
 
 ## Block J — Generate an image from a prompt
 
-### §PB78 A Revelei.Generation layer over the engine
-
-A new project, Revelei.Generation, beside Revelei.Inference and standing on
-Revelei.Imaging alone; `LayeringTests` gets its row, and only the app references it.
-
-It wraps the engine PB77 chose behind a small API: `GenerateAsync(GenerationRequest,
-IProgress<GenerationProgress>, CancellationToken) -> RgbaImage`, where the request names
-the model and quantisation, prompt, negative prompt where the model uses one, width,
-height, steps, guidance, sampler and seed, and offload on or off. Progress reports the
-stage (loading, encoding the prompt, step n of m, decoding) and, when the engine offers
-it, a low-resolution preview of the current step.
-
-The loaded model is kept, as `SessionCache` keeps ONNX sessions, until it is idle or
-another model is asked for, because loading a 12 GB model takes longer than one image.
-Per the spike (spike/diffusion/README.md) the engine runs in a small host process the
-layer talks to over a pipe: the struct layout is pinned to one engine release, a native
-crash ends only the host, and a cancel that does not land is a kill. Inside it one
-thread owns the context. Loading and VAE tiles also arrive as progress steps.
-
-Tests: the P/Invoke signatures against the header version pinned, a tiny model for an
-end-to-end generation in CI where one exists, and the real models skipped with the
-reason when `.cache\models` lacks them, as the existing model tests do.
-
 ### §PB79 The first generation models in the catalog
 
 Start with the models that fit the owner's RTX 4060 8 GB and cover the range, each
@@ -148,6 +125,9 @@ Centre: the image as it forms, with the step preview PB78 reports, then the resu
 Generate turns into Cancel while running, and the status bar says the stage, step n of
 m, the elapsed time and, once one step is done, the time left. A run on a model whose
 verdict is Runs, slower says so before it starts.
+
+Leaving Create, or ten idle minutes, disposes the GenerationClient (PB78), ending its
+host and freeing the model's memory.
 
 Below: a strip of this session's results; clicking one shows it with its prompt and
 settings, and Use these settings copies them back.

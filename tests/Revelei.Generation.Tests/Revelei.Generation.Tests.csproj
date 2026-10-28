@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Revelei.Generation.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Revelei.Generation\Revelei.Generation.csproj" />
+    <!-- PB78: the host the client drives, copied beside the tests so they start the real exe. -->
+    <ProjectReference Include="..\..\src\Revelei.Generation.Host\Revelei.Generation.Host.csproj" />
+  </ItemGroup>
+
+</Project>
