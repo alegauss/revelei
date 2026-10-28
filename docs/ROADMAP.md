@@ -18,7 +18,7 @@
 
 ## Block I — Model manager: catalog, updates and hardware fit
 
-- ⏳ **PB76** (deps: PB72 ✅, PB78 ✅) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — A Test speed button, and generation's own measure once its engine reports per step. → §PB76
+- 🛠 **PB76** (deps: PB72 ✅, PB78 ✅, PB79, PB80) **The hardware verdict stays an estimate after a model has run here; this PC's own speed is never shown** — A Test speed button, and generation's own measure once its engine reports per step. → §PB76
 - 📋 **PB85** (deps: PB75 ✅) **A model card offers only the recommended quantisation; a larger or smaller one cannot be chosen** — Picking quality against speed and disk is the person's call, and the verdict per quantisation is already computed. → §PB85
 
 ## Block J — Generate an image from a prompt
