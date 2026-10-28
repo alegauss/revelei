@@ -65,6 +65,7 @@ public sealed class FirstUseTests : IDisposable
         Assert.Contains("503", DownloadFailure.Explain(new HttpRequestException("busy", null, HttpStatusCode.ServiceUnavailable), 0).What, StringComparison.Ordinal);
         Assert.StartsWith("A file arrived damaged", DownloadFailure.Explain(new InvalidDataException("bad"), 0).What, StringComparison.Ordinal);
         Assert.Equal("The disk is full.", DownloadFailure.Explain(new IOException("full", unchecked((int)0x80070070)), 0).What);
+        Assert.Equal("The download needs 300 MB and the disk has 10 MB free.", DownloadFailure.Explain(new NotEnoughDiskException(300L << 20, 10L << 20), 0).What);
         Assert.EndsWith("The 120 MB already downloaded are kept.", DownloadFailure.Explain(new HttpRequestException("gone"), 120L << 20).Todo, StringComparison.Ordinal);
         Assert.DoesNotContain("kept", DownloadFailure.Explain(new HttpRequestException("gone"), 0).Todo, StringComparison.Ordinal);
     }

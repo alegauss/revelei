@@ -105,6 +105,8 @@ public sealed record DownloadFailure(string What, string Todo)
                 new("A file arrived damaged, so it was deleted and never used.", "Try again: it is downloaded afresh."),
             UnauthorizedAccessException =>
                 new("Revelei is not allowed to write to its models folder.", "Check the folder's permissions, then try again."),
+            NotEnoughDiskException disk =>
+                new($"The download needs {disk.Needed >> 20} MB and the disk has {disk.Free >> 20} MB free.", "Free some space, then try again." + keeping),
             IOException { HResult: DiskFull or HandleDiskFull } =>
                 new("The disk is full.", "Free some space and try again." + keeping),
             IOException =>

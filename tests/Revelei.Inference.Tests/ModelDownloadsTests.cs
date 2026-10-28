@@ -167,6 +167,26 @@ public sealed class ModelDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task ADriveThatCannotHoldTheDownloadIsRefusedBeforeTheFirstByte()
+    {
+        // PB73: what is left plus the margin must fit, so a 12 GB file never fills the disk midway.
+        ModelManifest manifest = Manifest(("tiny-x4", "weights"u8.ToArray()));
+        Served server = new(served);
+        using HttpClient http = new(server);
+        ModelDownloads.FreeSpace.Value = _ => ModelDownloads.DiskMargin;
+
+        NotEnoughDiskException refused = await Assert.ThrowsAsync<NotEnoughDiskException>(() =>
+            ModelDownloads.DownloadAsync(http, manifest, Path.Combine(root, "models"), null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(ModelDownloads.TotalBytes(manifest) + ModelDownloads.DiskMargin, refused.Needed);
+        Assert.Equal(0, server.Requests);
+        Assert.False(Directory.Exists(Path.Combine(root, "models")));
+
+        ModelDownloads.FreeSpace.Value = _ => ModelDownloads.DiskMargin + ModelDownloads.TotalBytes(manifest);
+        Assert.Equal(new DownloadResult(2, 0), await ModelDownloads.DownloadAsync(http, manifest, Path.Combine(root, "models"), null, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public void PlainHttpIsTrustedOnlyOnLoopbackAndOnlyWhenAskedFor()
     {
         // PB59: --manifest may name the UI cases' fixture server; the pinned manifest stays https.
@@ -245,8 +265,11 @@ public sealed class ModelDownloadsTests : IDisposable
 
         public List<long> RangesAsked { get; } = [];
 
+        public int Requests { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            Requests++;
             if (FailuresLeft > 0)
             {
                 FailuresLeft--;

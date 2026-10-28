@@ -181,6 +181,19 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
     public ManifestModel? Model(string name) => Models.FirstOrDefault(m => m.Name == name);
 }
 
+/// <summary>PB73: the drive cannot hold a download, said before its first byte.</summary>
+/// <param name="needed">Bytes the download needs, the margin included.</param>
+/// <param name="free">Bytes free on the drive.</param>
+public sealed class NotEnoughDiskException(long needed, long free)
+    : IOException($"The download needs {needed} bytes and the drive has {free} free.")
+{
+    /// <summary>Bytes the download needs, the margin included.</summary>
+    public long Needed { get; } = needed;
+
+    /// <summary>Bytes free on the drive.</summary>
+    public long Free { get; } = free;
+}
+
 /// <summary>What a download is doing.</summary>
 public enum DownloadStage
 {
@@ -322,6 +335,7 @@ public static class ModelDownloads
     {
         ArgumentNullException.ThrowIfNull(http);
         ArgumentNullException.ThrowIfNull(manifest);
+        EnsureDisk(manifest, root, elsewhere, models);
         long total = TotalBytes(manifest, models);
         long done = 0;
         int fetched = 0, present = 0;
@@ -347,11 +361,12 @@ public static class ModelDownloads
             string part = path + ".part";
             long before = done;
             TimeSpan pause = retryDelay ?? TimeSpan.FromSeconds(1);
+            string? digest;
             for (int attempt = 1; ; attempt++)
             {
                 try
                 {
-                    await FetchAsync(http, expected, part, label, before, total, speed, progress, cancellation).ConfigureAwait(false);
+                    digest = await FetchAsync(http, expected, part, label, before, total, speed, progress, cancellation).ConfigureAwait(false);
                     break;
                 }
                 catch (Exception failure) when (Transient(failure) && !cancellation.IsCancellationRequested && attempt < Attempts)
@@ -363,7 +378,10 @@ public static class ModelDownloads
             }
 
             progress?.Report(new DownloadProgress(label, before + expected.Bytes, total, DownloadStage.Verifying, speed.BytesPerSecond));
-            if (!Valid(part, expected))
+            bool valid = digest is null
+                ? Valid(part, expected)
+                : new FileInfo(part).Length == expected.Bytes && digest == expected.Sha256;
+            if (!valid)
             {
                 File.Delete(part);
                 throw new InvalidDataException($"{label} arrived different from the manifest (size or SHA-256), so it was deleted and nothing was loaded.");
@@ -382,14 +400,16 @@ public static class ModelDownloads
 
     // One attempt at one file: resumes from the .part when the server honours a range, and
     // starts over when it does not or when the .part is already as long as the file should be.
-    private static async Task FetchAsync(HttpClient http, ManifestFile expected, string part, string label, long before, long total, Speed speed, IProgress<DownloadProgress>? progress, CancellationToken cancellation)
+    // PB73: returns the SHA-256 hashed while streaming, the resumed bytes read once to seed it, so
+    // a 12 GB file is not read a second time to verify it; null when nothing was fetched.
+    private static async Task<string?> FetchAsync(HttpClient http, ManifestFile expected, string part, string label, long before, long total, Speed speed, IProgress<DownloadProgress>? progress, CancellationToken cancellation)
     {
         long have = File.Exists(part) ? new FileInfo(part).Length : 0;
         if (have >= expected.Bytes)
         {
             if (have == expected.Bytes)
             {
-                return; // Fetched last time and never verified; the caller verifies it now.
+                return null; // Fetched last time and never verified; the caller verifies it now.
             }
 
             File.Delete(part);
@@ -416,6 +436,18 @@ public static class ModelDownloads
                 have = 0;
             }
 
+            using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            if (resumed)
+            {
+                await using FileStream seed = new(part, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16, useAsync: true);
+                byte[] chunk = new byte[1 << 20];
+                int got;
+                while ((got = await seed.ReadAsync(chunk, cancellation).ConfigureAwait(false)) > 0)
+                {
+                    hash.AppendData(chunk, 0, got);
+                }
+            }
+
             await using Stream source = await response.Content.ReadAsStreamAsync(stall.Token).ConfigureAwait(false);
             await using FileStream target = new(part, resumed ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16, useAsync: true);
             byte[] buffer = new byte[1 << 20];
@@ -424,14 +456,41 @@ public static class ModelDownloads
             {
                 stall.CancelAfter(StallTimeout);
                 await target.WriteAsync(buffer.AsMemory(0, read), cancellation).ConfigureAwait(false);
+                hash.AppendData(buffer, 0, read);
                 have += read;
                 speed.Add(read);
                 progress?.Report(new DownloadProgress(label, before + have, total, DownloadStage.Downloading, speed.BytesPerSecond));
             }
+
+            return Convert.ToHexStringLower(hash.GetHashAndReset());
         }
         catch (OperationCanceledException silent) when (!cancellation.IsCancellationRequested)
         {
             throw new IOException($"The connection went silent for {StallTimeout.TotalSeconds:0} seconds.", silent);
+        }
+    }
+
+    /// <summary>Room kept free beyond the files themselves, so a download never fills the drive to the last byte.</summary>
+    public const long DiskMargin = 256L << 20;
+
+    // Tests set this to stand for a drive's free space; it flows only through their own awaits.
+    internal static readonly AsyncLocal<Func<string, long>?> FreeSpace = new();
+
+    // PB73: refuses before the first byte when the drive cannot hold what is left plus a margin,
+    // where a 12 GB download would otherwise fail with a full disk most of the way through.
+    private static void EnsureDisk(ModelManifest manifest, string root, IReadOnlyList<string>? elsewhere, IReadOnlyCollection<string>? models)
+    {
+        long needed = PendingBytes(manifest, root, elsewhere, models);
+        if (needed == 0)
+        {
+            return;
+        }
+
+        string drive = Path.GetPathRoot(Path.GetFullPath(root))!;
+        long free = FreeSpace.Value?.Invoke(drive) ?? new DriveInfo(drive).AvailableFreeSpace;
+        if (free < needed + DiskMargin)
+        {
+            throw new NotEnoughDiskException(needed + DiskMargin, free);
         }
     }
 
