@@ -21,6 +21,7 @@ public enum QualityMode
 /// <param name="Quality">The quality mode to start in, or null for the saved one.</param>
 /// <param name="Manifest">A manifest file to download models from instead of the pinned one (PB59).</param>
 /// <param name="ChosenModels">PB74: the models folder the person chose, from <see cref="AppSettings"/>; --models overrides it.</param>
+/// <param name="Engine">PB80: the generation engine's folder, or "fake" for the UI cases' stand-in; else the one beside the app.</param>
 public sealed record AppOptions(
     string? Open = null,
     string? Models = null,
@@ -28,7 +29,8 @@ public sealed record AppOptions(
     string? Export = null,
     QualityMode? Quality = null,
     string? Manifest = null,
-    string? ChosenModels = null)
+    string? ChosenModels = null,
+    string? Engine = null)
 {
     /// <summary>%LOCALAPPDATA%\Revelei\models, where downloaded models go unless --models says otherwise.</summary>
     public static string DefaultModels =>
@@ -48,6 +50,21 @@ public sealed record AppOptions(
     /// the status bar rather than met as a missing file. --models is the tests' and is not asked.
     /// </summary>
     public bool ChosenModelsMissing => Models is null && ChosenModels is { } chosen && !Directory.Exists(chosen);
+
+    /// <summary>The generation engine installed beside the app (PB83), which --engine overrides.</summary>
+    public static string BundledEngine => Path.Combine(AppContext.BaseDirectory, "engine");
+
+    /// <summary>
+    /// PB80: what Revelei.Generation.Host is started with: --fake for the UI cases' stand-in, else
+    /// --engine and the folder holding stable-diffusion.dll; null when there is no engine.
+    /// </summary>
+    public IReadOnlyList<string>? EngineArguments => Engine switch
+    {
+        "fake" => ["--fake"],
+        { } folder => ["--engine", folder],
+        null when File.Exists(Path.Combine(BundledEngine, "stable-diffusion.dll")) => ["--engine", BundledEngine],
+        _ => null,
+    };
 }
 
 /// <summary>A parse: the options, or why the command line was refused.</summary>
@@ -67,7 +84,7 @@ public sealed record ParsedCommandLine(AppOptions? Options, string? Error)
 /// </summary>
 public static class CommandLine
 {
-    private static readonly string[] Flags = ["--open", "--models", "--provider", "--export", "--quality", "--manifest"];
+    private static readonly string[] Flags = ["--open", "--models", "--provider", "--export", "--quality", "--manifest", "--engine"];
 
     /// <summary>Parses the arguments after the executable's name.</summary>
     /// <param name="args">The arguments.</param>
@@ -138,6 +155,11 @@ public static class CommandLine
             }
         }
 
+        if (given.TryGetValue("--engine", out string? engine) && engine != "fake" && !Directory.Exists(engine))
+        {
+            return Refuse($"--engine {engine} is not a folder, nor fake.");
+        }
+
         if (given.TryGetValue("--manifest", out string? manifest) && !File.Exists(manifest))
         {
             return Refuse($"--manifest {manifest} is not a file.");
@@ -150,7 +172,8 @@ public static class CommandLine
                 Provider: provider,
                 Export: given.GetValueOrDefault("--export"),
                 Quality: quality,
-                Manifest: manifest),
+                Manifest: manifest,
+                Engine: engine),
             null);
     }
 

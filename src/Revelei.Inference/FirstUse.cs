@@ -27,6 +27,11 @@ public static class FirstUse
         [FaceRestore.Model] = "GFPGAN v1.4, the face restorer",
         [RemoveBackground.Model] = "RMBG-1.4 by BRIA, which finds the subject",
         [Matting.Model] = "ViTMatte, which refines the edges",
+
+        // PB80: the text-to-image models PB79 put in the catalog.
+        ["z-image-turbo"] = "Z-Image Turbo",
+        ["flux-2-klein-4b"] = "FLUX.2 klein 4B",
+        ["qwen-image"] = "Qwen-Image",
     };
 
     /// <summary>

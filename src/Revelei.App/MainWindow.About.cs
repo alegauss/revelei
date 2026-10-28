@@ -22,6 +22,11 @@ public partial class MainWindow
                 OnModelsClick(this, new RoutedEventArgs());
             }
 
+            if (CreatePanel.Visibility == Visibility.Visible)
+            {
+                OnCreateClick(this, new RoutedEventArgs()); // PB80: one panel in the stage's place at a time.
+            }
+
             FillAbout();
             ConsentPanel.Visibility = Visibility.Collapsed; // About replaces an unanswered offer; the card still has it.
             consenting = null;

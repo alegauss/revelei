@@ -35,6 +35,11 @@ public partial class MainWindow
                 OnAboutClick(this, new RoutedEventArgs());
             }
 
+            if (CreatePanel.Visibility == Visibility.Visible)
+            {
+                OnCreateClick(this, new RoutedEventArgs()); // PB80: one panel in the stage's place at a time.
+            }
+
             ConsentPanel.Visibility = Visibility.Collapsed;
             consenting = null;
             FillModels();
@@ -205,7 +210,7 @@ public partial class MainWindow
         {
             Progress<(long Done, long Total)> progress = new(p => DownloadStatus.Text = $"Moving the models: {DownloadText.Size(p.Done)} of {DownloadText.Size(p.Total)}…");
             await ModelsFolderMove.MoveAsync(Options.ModelsFolder, chosen, progress, CancellationToken.None).ConfigureAwait(true);
-            new AppSettings(chosen).Save(AppSettings.DefaultPath);
+            (AppSettings.Load(AppSettings.DefaultPath) with { ModelsFolder = chosen }).Save(AppSettings.DefaultPath);
             Restart();
         }
         catch (Exception failure) when (failure is IOException or ArgumentException or UnauthorizedAccessException)

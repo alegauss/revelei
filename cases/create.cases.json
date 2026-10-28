@@ -1,0 +1,66 @@
+{
+  // PB80: the Create screen, generating through Revelei.Generation.Host's fake engine (--engine
+  // fake), which samples in steps and writes a gradient, so a case runs on a desk with no GPU and
+  // no model. The models folder holds a staged z-image-turbo whose installed.json names three
+  // stand-in files in .shared, which is how a downloaded generation model looks (PB73, PB79).
+
+  "fixtures": [
+    {
+      "name": "a window with a staged generation model and the fake engine",
+      "files": [
+        { "from": "cases/fixtures/generation/z-image-turbo/installed.json", "to": "models/z-image-turbo/installed.json" },
+        { "from": "cases/fixtures/generation/shared/fake-transformer", "to": "models/.shared/fake-transformer" },
+        { "from": "cases/fixtures/generation/shared/fake-text-encoder", "to": "models/.shared/fake-text-encoder" },
+        { "from": "cases/fixtures/generation/shared/fake-vae", "to": "models/.shared/fake-vae" }
+      ],
+      "arguments": ["--models", "{files}/models", "--engine", "fake", "--provider", "cpu"],
+      "shareable": false
+    },
+    {
+      "name": "a window with no generation model",
+      "arguments": ["--models", "tests/fixtures/images", "--engine", "fake", "--provider", "cpu"],
+      "shareable": true
+    }
+  ],
+
+  "cases": [
+    {
+      "name": "Create generates an image from a prompt with the installed model",
+      "catches": "a Create screen that does not offer the installed model, does not generate, or does not show the result and the seed",
+      "filed": "PB80",
+      "tags": ["create"],
+      "fixture": "a window with a staged generation model and the fake engine",
+      "steps": [
+        { "locator": "Button#DropZoneCreate", "act": "invoke", "named": "Create one is pressed on the empty window" },
+        { "locator": "ComboBox#CreateModel", "act": "read", "reads": "picked", "expect": "Z-Image Turbo · q4_k", "named": "the installed model is chosen" },
+        { "locator": "Edit#CreateSteps", "act": "read", "reads": "value", "expect": "8", "named": "with the steps a model the catalog does not describe takes" },
+        { "locator": "ComboBox#CreateAspect", "act": "read", "reads": "picked", "expect": "Square 1:1 · 1024 × 1024", "named": "square by default" },
+        { "locator": "Edit#CreateSeed", "act": "set value", "with": "42", "reads": "value", "expect": "42", "named": "seed 42 is typed" },
+        { "locator": "CheckBox#CreateSeedLock", "act": "toggle", "reads": "toggle", "expect": "On", "named": "and kept" },
+        { "locator": "Edit#CreatePrompt", "act": "set value", "with": "A red fox in the snow", "reads": "value", "expect": "A red fox in the snow", "named": "a prompt is written" },
+        { "locator": "Button#CreateGenerate", "act": "invoke", "named": "Generate is pressed" },
+        { "locator": "Text#CreateStatus", "act": "read", "reads": "name", "matches": "^Done in \\d+ s · 1024 × 1024 · seed 42\\.$", "named": "it says it is done, the size and the seed" },
+        { "locator": "Edit#CreateSeed", "act": "read", "reads": "value", "expect": "42", "named": "the kept seed is still there" },
+        { "locator": "Button#CreateGenerate", "act": "read", "reads": "name", "expect": "Generate", "named": "and Generate is back" },
+        { "locator": "Button#CreateClose", "act": "invoke", "named": "Create is closed" },
+        { "locator": "Button#CreateButton", "act": "read", "reads": "name", "expect": "Create", "named": "and the window is back" }
+      ]
+    },
+
+    {
+      "name": "with no generation model Create sends to the Models panel",
+      "catches": "a Create screen that offers Generate with nothing to generate with, or hides where to get a model",
+      "filed": "PB80",
+      "tags": ["create"],
+      "fixture": "a window with no generation model",
+      "steps": [
+        { "locator": "Button#CreateButton", "act": "invoke", "named": "Create is opened" },
+        { "locator": "Text#CreateNoModelText", "act": "read", "reads": "name", "matches": "^No image generation model is on this PC yet\\.", "named": "it says there is no model" },
+        { "locator": "Button#CreateGenerate", "act": "read", "reads": "enabled", "expect": "not enabled", "named": "Generate cannot start" },
+        { "locator": "Button#CreateOpenModels", "act": "invoke", "named": "Open Models is pressed" },
+        { "locator": "Button#ModelsClose", "act": "read", "reads": "enabled", "expect": "enabled", "named": "the Models panel is open in its place" },
+        { "locator": "Button#ModelsClose", "act": "invoke", "named": "the Models panel is closed" }
+      ]
+    }
+  ]
+}

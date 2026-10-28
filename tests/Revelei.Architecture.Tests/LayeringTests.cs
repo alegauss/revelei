@@ -12,7 +12,7 @@ public sealed class LayeringTests
 {
     private static readonly string[] Nothing = [];
     private static readonly string[] ImagingOnly = ["Revelei.Imaging"];
-    private static readonly string[] EveryLayer = ["Revelei.Imaging", "Revelei.Inference", "Revelei.Render"];
+    private static readonly string[] EveryLayer = ["Revelei.Imaging", "Revelei.Inference", "Revelei.Render", "Revelei.Generation", "Revelei.Generation.Host"];
 
     // project, the projects it is allowed to reference
     private static readonly Dictionary<string, string[]> Allowed = new(StringComparer.Ordinal)

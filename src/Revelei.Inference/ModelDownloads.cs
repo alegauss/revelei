@@ -28,6 +28,11 @@ public sealed record ManifestMemory(long VideoBytes, long SystemBytes);
 /// <param name="Memory">What it needs to run, or null where the catalog does not say.</param>
 public sealed record ManifestQuantisation(IReadOnlyList<ManifestPart> Files, ManifestMemory? Memory = null);
 
+/// <summary>The settings a generation model was made for (PB80).</summary>
+/// <param name="Steps">Sampling steps.</param>
+/// <param name="Guidance">The CFG scale.</param>
+public sealed record ModelDefaults(int Steps, float Guidance);
+
 /// <summary>What runs a model.</summary>
 public enum ModelKind
 {
@@ -49,6 +54,7 @@ public enum ModelKind
 /// <param name="Quantisations">PB70: every way to download it; schema 1's variants read as weights alone.</param>
 /// <param name="Note">PB71: one line on what this version changed, which an update shows.</param>
 /// <param name="Task">PB75: what it does (upscale, face-restore, background-removal, denoise...), which groups it.</param>
+/// <param name="Defaults">PB80: a generation model's steps and guidance.</param>
 public sealed record ManifestModel(
     string Name,
     ManifestFile? Meta,
@@ -59,7 +65,8 @@ public sealed record ManifestModel(
     bool NonCommercial = false,
     IReadOnlyDictionary<string, ManifestQuantisation>? Quantisations = null,
     string? Note = null,
-    string? Task = null);
+    string? Task = null,
+    ModelDefaults? Defaults = null);
 
 /// <summary>
 /// scripts/build-manifest.py's manifest.json (PB12), schema 1, or the catalog PB70 publishes at a
@@ -150,7 +157,8 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
         ManifestFile? Meta = null,
         bool NonCommercial = false,
         string? Note = null,
-        string? Task = null)
+        string? Task = null,
+        ModelDefaults? Defaults = null)
     {
         public ManifestModel Read()
         {
@@ -178,7 +186,7 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
                 }
             }
 
-            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations, Note, Task);
+            return new ManifestModel(Name, Meta, variants, License, Version, kind, NonCommercial, Quantisations, Note, Task, Defaults);
         }
     }
 

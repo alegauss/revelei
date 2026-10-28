@@ -42,6 +42,15 @@ public sealed class CommandLineTests
     }
 
     [Fact]
+    public void EngineNamesAFolderOrTheFakeOne()
+    {
+        // PB80: --engine fake is the UI cases' stand-in for stable-diffusion.cpp.
+        Assert.Equal(["--fake"], CommandLine.Parse(["--engine", "fake"]).Options!.EngineArguments);
+        Assert.Equal(["--engine", Repository.Root], CommandLine.Parse(["--engine", Repository.Root]).Options!.EngineArguments);
+        Assert.Equal("--engine nowhere is not a folder, nor fake.", CommandLine.Parse(["--engine", "nowhere"]).Error);
+    }
+
+    [Fact]
     public void SettingsRoundTripAndADamagedFileReadsAsTheDefaults()
     {
         string folder = Path.Combine(Path.GetTempPath(), "pb-settings-" + Guid.NewGuid().ToString("N"));

@@ -73,6 +73,8 @@
       <!-- PB75: the Models panel, every catalog model as a card. -->
       <StatusBarItem HorizontalAlignment="Right">
         <StackPanel Orientation="Horizontal">
+          <!-- PB80: the Create screen, a prompt to an image. -->
+          <Button x:Name="CreateButton" AutomationProperties.AutomationId="CreateButton" Content="Create" Padding="10,2" Margin="0,0,6,0" Click="OnCreateClick" />
           <Button x:Name="ModelsButton" AutomationProperties.AutomationId="ModelsButton" Content="Models" Padding="10,2" Margin="0,0,6,0" Click="OnModelsClick" />
           <Button x:Name="AboutButton" AutomationProperties.AutomationId="AboutButton" Content="About" Padding="10,2" Click="OnAboutClick" />
         </StackPanel>
@@ -352,8 +354,13 @@
           <TextBlock Text="Drop a photo here" Style="{StaticResource StatValue}" HorizontalAlignment="Center" />
           <TextBlock Text="PNG, JPG, WebP, TIFF and whatever else Windows can open" Style="{StaticResource StatCaption}"
                      HorizontalAlignment="Center" Margin="0,6,0,20" />
-          <Button x:Name="OpenButton" AutomationProperties.AutomationId="OpenButton" Content="Open image…"
-                  HorizontalAlignment="Center" Padding="16,6" Click="OnOpenClick" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="OpenButton" AutomationProperties.AutomationId="OpenButton" Content="Open image…"
+                    Padding="16,6" Click="OnOpenClick" />
+            <!-- PB80: or create one from a sentence. -->
+            <Button x:Name="DropZoneCreate" AutomationProperties.AutomationId="DropZoneCreate" Content="Create one…"
+                    Padding="16,6" Margin="8,0,0,0" Click="OnCreateClick" />
+          </StackPanel>
           <TextBlock x:Name="OpenError" AutomationProperties.AutomationId="OpenError" Visibility="Collapsed"
                      Margin="0,16,0,0" TextWrapping="Wrap" MaxWidth="420" TextAlignment="Center"
                      Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
@@ -443,6 +450,75 @@
 
       <!-- PB75: the Models panel takes the stage's place, as About does: every catalog model as a
            card, filterable, with its verdict, version and actions, all going through the queue. -->
+      <!-- PB80: the Create screen takes the stage's place, as Models does: the settings on the
+           left, the image as it forms in the centre, Generate turning into Cancel while it runs. -->
+      <DockPanel x:Name="CreatePanel" AutomationProperties.AutomationId="CreatePanel" Visibility="Collapsed">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <Button x:Name="CreateClose" AutomationProperties.AutomationId="CreateClose" DockPanel.Dock="Right"
+                  Content="Close" Padding="12,4" Click="OnCreateClick" />
+          <TextBlock Text="Create" Style="{StaticResource StatValue}" VerticalAlignment="Center" />
+        </DockPanel>
+        <Border DockPanel.Dock="Left" Style="{StaticResource GroupCard}" Padding="16" Width="320" VerticalAlignment="Top">
+          <StackPanel>
+            <StackPanel x:Name="CreateNoModel" Visibility="Collapsed" Margin="0,0,0,12">
+              <TextBlock x:Name="CreateNoModelText" AutomationProperties.AutomationId="CreateNoModelText" TextWrapping="Wrap"
+                         Text="No image generation model is on this PC yet. The Models panel lists them, with how each runs here." />
+              <Button x:Name="CreateOpenModels" AutomationProperties.AutomationId="CreateOpenModels" Content="Open Models"
+                      HorizontalAlignment="Left" Padding="12,4" Margin="0,8,0,0" Click="OnModelsClick" />
+            </StackPanel>
+            <TextBlock Text="Model" Style="{StaticResource StatCaption}" />
+            <ComboBox x:Name="CreateModel" AutomationProperties.AutomationId="CreateModel" AutomationProperties.Name="Model"
+                      DisplayMemberPath="Label" Margin="0,2,0,2" SelectionChanged="OnCreateModelChanged" />
+            <TextBlock x:Name="CreateFit" AutomationProperties.AutomationId="CreateFit" Style="{StaticResource StatCaption}"
+                       TextWrapping="Wrap" Margin="0,0,0,10" />
+            <TextBlock Text="Prompt" Style="{StaticResource StatCaption}" />
+            <TextBox x:Name="CreatePrompt" AutomationProperties.AutomationId="CreatePrompt" AutomationProperties.Name="Prompt"
+                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="96" MaxHeight="220" VerticalScrollBarVisibility="Auto"
+                     Margin="0,2,0,10" />
+            <TextBlock Text="Shape" Style="{StaticResource StatCaption}" />
+            <ComboBox x:Name="CreateAspect" AutomationProperties.AutomationId="CreateAspect" AutomationProperties.Name="Shape"
+                      DisplayMemberPath="Label" Margin="0,2,0,10" />
+            <Grid Margin="0,0,0,10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="Steps" Style="{StaticResource StatCaption}" />
+                <TextBox x:Name="CreateSteps" AutomationProperties.AutomationId="CreateSteps" AutomationProperties.Name="Steps" Margin="0,2,0,0" />
+              </StackPanel>
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="Guidance" Style="{StaticResource StatCaption}" />
+                <TextBox x:Name="CreateGuidance" AutomationProperties.AutomationId="CreateGuidance" AutomationProperties.Name="Guidance" Margin="0,2,0,0" />
+              </StackPanel>
+            </Grid>
+            <TextBlock Text="Seed" Style="{StaticResource StatCaption}" />
+            <DockPanel Margin="0,2,0,4">
+              <Button x:Name="CreateDice" AutomationProperties.AutomationId="CreateDice" AutomationProperties.Name="New seed"
+                      DockPanel.Dock="Right" Padding="8,2" Margin="6,0,0,0" ToolTip="A new random seed" Click="OnCreateDiceClick">
+                <TextBlock Style="{StaticResource ToolbarIcon}" Text="&#xE8B1;" />
+              </Button>
+              <TextBox x:Name="CreateSeed" AutomationProperties.AutomationId="CreateSeed" AutomationProperties.Name="Seed" />
+            </DockPanel>
+            <CheckBox x:Name="CreateSeedLock" AutomationProperties.AutomationId="CreateSeedLock" Content="Keep this seed"
+                      Margin="0,0,0,10" ToolTip="Off, each image takes a new seed" />
+            <Button x:Name="CreateReset" AutomationProperties.AutomationId="CreateReset" Content="Reset to the model's settings"
+                    HorizontalAlignment="Left" Padding="10,2" Margin="0,0,0,14" Click="OnCreateResetClick" />
+            <Button x:Name="CreateGenerate" AutomationProperties.AutomationId="CreateGenerate" Content="Generate"
+                    Padding="16,6" Click="OnCreateGenerateClick" />
+          </StackPanel>
+        </Border>
+        <DockPanel Margin="16,0,0,0">
+          <TextBlock x:Name="CreateStatus" AutomationProperties.AutomationId="CreateStatus" DockPanel.Dock="Bottom"
+                     Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          <Border Style="{StaticResource GroupCard}">
+            <Image x:Name="CreateImage" AutomationProperties.AutomationId="CreateImage" AutomationProperties.Name="Generated image"
+                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
+          </Border>
+        </DockPanel>
+      </DockPanel>
+
       <ScrollViewer x:Name="ModelsPanel" AutomationProperties.AutomationId="ModelsPanel" Visibility="Collapsed"
                     VerticalScrollBarVisibility="Auto">
         <Border Style="{StaticResource GroupCard}" Padding="24" MaxWidth="860" HorizontalAlignment="Center" VerticalAlignment="Top">

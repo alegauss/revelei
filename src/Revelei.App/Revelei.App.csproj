@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The WPF shell, and the only assembly allowed to reference all three libraries. -->
+  <!-- The WPF shell, and the only assembly allowed to reference every library. -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <!-- Revelei.Inference's, which Windows ML sets (PB43). -->
@@ -30,6 +30,9 @@
     <ProjectReference Include="..\Revelei.Imaging\Revelei.Imaging.csproj" />
     <ProjectReference Include="..\Revelei.Inference\Revelei.Inference.csproj" />
     <ProjectReference Include="..\Revelei.Render\Revelei.Render.csproj" />
+    <!-- PB80: text-to-image, and the host process it drives, copied beside the app. -->
+    <ProjectReference Include="..\Revelei.Generation\Revelei.Generation.csproj" />
+    <ProjectReference Include="..\Revelei.Generation.Host\Revelei.Generation.Host.csproj" />
   </ItemGroup>
 
 </Project>

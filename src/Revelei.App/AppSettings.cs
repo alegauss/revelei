@@ -9,7 +9,8 @@ namespace Revelei.App;
 /// A file that is missing or does not read is the defaults, so a damaged one never stops a start.
 /// </summary>
 /// <param name="ModelsFolder">Where downloaded models live, or null for <see cref="AppOptions.DefaultModels"/>.</param>
-public sealed record AppSettings(string? ModelsFolder = null)
+/// <param name="Prompt">PB80: the last prompt Create generated from, kept between sessions.</param>
+public sealed record AppSettings(string? ModelsFolder = null, string? Prompt = null)
 {
     private static readonly JsonSerializerOptions Options = new()
     {

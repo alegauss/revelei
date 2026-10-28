@@ -175,6 +175,11 @@ public partial class MainWindow
             OnModelsClick(this, new RoutedEventArgs());
         }
 
+        if (CreatePanel.Visibility == Visibility.Visible)
+        {
+            OnCreateClick(this, new RoutedEventArgs());
+        }
+
         ConsentPanel.Visibility = Visibility.Visible;
         Stage.Visibility = Visibility.Collapsed;
         ConsentAccept.Focus();
