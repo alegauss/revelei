@@ -91,3 +91,8 @@
 - ✅ **PB66** **A photo cannot be mirrored horizontally or vertically** — Flip horizontal and Flip vertical mirror the photo from the toolbar as exact pixel moves, each a version that undoes; two flips give back the same bytes.
 - ✅ **PB67** **A photo cannot be cropped, so the subject cannot be framed before or after an upscale** — Crop (or C) opens an editor on the photo with handles, aspect presets, its pixel size, Apply and Cancel; Apply cuts those pixels into a version that undoes.
 - ✅ **PB69** **Dragging a crop corner or edge mostly does nothing: the press lands beside the handle and moves or pans instead** — A crop corner or edge is grabbed within 12 screen pixels at any scale, an edge along its whole length, and the cursor shows the resize or move a press will do.
+
+## Block I — Model manager: catalog, updates and hardware fit
+
+## Block J — Generate an image from a prompt
+

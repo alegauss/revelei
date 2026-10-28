@@ -25,3 +25,271 @@ operation on the 16-bit samples, so inverting twice gives back the same bytes, a
 a version in the history like the other edits. Left as an idea until the owner says
 whether "invert" meant this or mirroring, which PB66 already covers; if it meant
 mirroring, this line is retired.
+
+## Block I — Model manager: catalog, updates and hardware fit
+
+### §PB70 A catalog the app can refresh
+
+Today `ModelDownloads.Embedded` is the whole world: schema 1, one variant (fp32) per
+model, pinned to a resolve/<commit>/ URL. That pinning is what lets the app trust every
+byte without the network, and it must survive.
+
+The catalog becomes schema 2, published beside the models on Hugging Face at a stable
+path, and the app keeps embedding the copy it was built with as the fallback and the
+floor. A fetched catalog is used only when (a) its Ed25519 signature verifies against a
+public key compiled into the app, and (b) its sequence number is not lower than the
+embedded one, so a stale or replayed file can never roll a model back. Every file inside
+it is still a resolve/<commit>/ URL with size and SHA-256, so the trust per file is
+unchanged.
+
+Schema 2 adds, per model: a version, a kind (`onnx` for today's operations, `diffusion`
+for block J), a list of files with roles (weights, text encoder, VAE) instead of one
+ONNX per variant, several quantisations to choose from, the memory each needs to run
+(read by the hardware-fit verdict), the license and whether it is non-commercial. The
+app reads schema 1 and 2 until the embedded copy moves to 2.
+
+The fetch happens only when the Models panel opens or the person presses Check now,
+never in the background at launch, and only the catalog is fetched: no photo, prompt or
+identifier leaves the PC.
+
+### §PB71 Model updates without breaking what works
+
+Each downloaded model gets an `installed.json` beside its files: the catalog version,
+the quantisation chosen, the date, and the hashes of what was fetched. Comparing it with
+the refreshed catalog (PB70) gives three states per model: up to date, update available,
+and withdrawn (the catalog no longer lists it, which keeps working but is labelled).
+
+An update downloads the new files next to the old ones (`<model>/<version>/`), verifies
+them, and only then switches the pointer and deletes the old version, so a failed or
+paused update leaves the working model untouched and an operation running on it is never
+pulled out from under. The panel names what changed from the catalog's one-line note and
+the size of the update; nothing is updated without the person pressing Update, except an
+optional "Update automatically" switch that is off by default.
+
+Models the installer carries are updated by a new installer, not here; the panel says so
+rather than offering an update it cannot apply in Program Files.
+
+### §PB72 A hardware verdict per model and quantisation
+
+The machine is already half measured: `GpuAdapters` reads each GPU's dedicated video
+memory and vendor, and `ProviderDetector` knows whether DirectML or TensorRT-RTX runs.
+Add system RAM (`GlobalMemoryStatusEx`), free disk on the models drive, and the GPU's
+shared memory.
+
+The catalog (PB70) carries, for each model and quantisation, the bytes that must sit in
+video memory for a full-GPU run, the bytes that can be streamed from RAM when
+offloading, and the disk. The verdict is one of four, with the reason in words:
+
+- **Runs well**: fits in video memory with a margin.
+- **Runs, slower**: fits only by offloading to RAM; says roughly how much slower.
+- **CPU only, very slow**: no usable GPU but enough RAM.
+- **Does not fit**: names what is short (RAM or disk) and by how much.
+
+For each model the panel recommends the best quantisation whose verdict is Runs well, or
+failing that Runs, slower, so on an RTX 4060 with 8 GB and 64 GB of RAM it would pick
+Z-Image Turbo Q4 as Runs well and Qwen-Image Q4 as Runs, slower.
+
+The numbers are estimates until the model has run here; the measured-speed task replaces
+them with this PC's own timings. The logic lives in Revelei.Inference with unit tests
+over fixed machine profiles, not in the window.
+
+### §PB73 Downloads sized for gigabytes
+
+`ModelDownloads.DownloadAsync` already resumes by HTTP Range, retries with back-off and
+verifies SHA-256 before the rename. Four things change for large files:
+
+1. **Free disk before the first byte.** The download refuses with the missing amount when the drive cannot hold the files plus a margin, instead of failing with a full disk.
+2. **Hash while streaming.** An `IncrementalHash` fed by each chunk avoids reading a 12 GB file a second time; on resume the existing .part is hashed once to seed it.
+3. **A queue.** Several models can be requested; one downloads at a time (the bandwidth is the limit), the rest wait in order, each can be paused, resumed, moved up or cancelled, and the queue survives a restart because it is written to disk.
+4. **Shared files once.** Z-Image Turbo and FLUX.2 klein both use a Qwen3 4B text encoder. Files are stored by SHA-256 in a shared folder and each model references them, so a shared encoder is downloaded once and removed only when no installed model uses it.
+
+The existing first-use cards for faces and background keep their behaviour and go
+through the same queue.
+
+### §PB74 A models folder the person chooses
+
+The Models panel gets a Location row: the folder, the space used and free there, and a
+Change button. Changing it moves the existing downloads (copy, verify by size, then
+delete the old copy, with progress and cancel) and records the choice in the app's
+settings, so `Options.ModelFolders` reads it on the next launch; `--models` on the
+command line still overrides it for the tests and the bench.
+
+The installer's own `models` folder beside the executable is not moved and stays first
+in the search order. A chosen folder that later disappears (an unplugged drive) is
+reported in the status bar and the operations that need it offer to download again or to
+point at the folder, rather than failing on a missing file.
+
+### §PB75 The Models panel
+
+A Models button beside About opens a panel that replaces the Downloads block of About
+(`MainWindow.Downloads.cs`). It lists every catalog model as a card, grouped by what it
+does (Upscale, Faces, Background, Denoise, Generate), filterable by Installed, Available
+and Updates.
+
+Each card shows: name and one-line description; size on disk and to download; the
+license, with a plain "non-commercial" badge where it applies; the hardware verdict
+(PB72) and the recommended quantisation, with a picker for the others and the verdict of
+each; the installed version and, when there is one, the update and what it changes
+(PB71); and the actions Download, Pause, Resume, Cancel, Update and Remove, all going
+through the queue (PB73). The footer shows the location and free space (PB74), Check now
+with the catalog date (PB70), and the queue.
+
+About keeps the version, the notices and a one-line "N models installed, X GB" that
+opens this panel. The first-use cards of Restore faces and Remove background keep their
+consent panel. Every control has an AutomationId, and the winwright cases in
+`cases/download.cases.json` move to the new panel, served by the existing fixture server
+with a schema 2 fixture catalog.
+
+### §PB76 Measured speed replaces the estimate
+
+Every run already logs its duration (`OperationLog`). Keep, per model, quantisation and
+provider, the median of the last few runs with the input size (megapixels for the photo
+operations, resolution and steps for generation) and the peak memory, in a small JSON
+file beside the settings.
+
+The Models card then shows "Measured here: 14 s per 1024x1024 image" instead of the
+estimate, and the verdict is recomputed from it. A Test speed button runs the model once
+on a fixed input (the model's own test image, or a fixed prompt and seed for generation)
+so a person can measure before relying on it; the bench tool (`tools/Revelei.Bench`)
+uses the same code path.
+
+An idea for now: its shape depends on what the generation engine reports per step, which
+the engine spike in block J settles.
+
+## Block J — Generate an image from a prompt
+
+### §PB77 Spike: which engine runs generation inside Revelei
+
+The goal is that a person installs Revelei and nothing else: no Python, no ComfyUI.
+Three candidates:
+
+| Engine | For | Against |
+| --- | --- | --- |
+| **stable-diffusion.cpp** (MIT, C/C++, ggml) | One native DLL called by P/Invoke; GGUF quantisations; `--offload-to-cpu`; Z-Image, Qwen-Image (2512 and 2.1), FLUX.2 klein, SD3.5 and SDXL supported; Vulkan backend for any GPU, CUDA for NVIDIA | Native code to ship and keep up to date; offload on Vulkan unverified |
+| ONNX via Windows ML (what runs today) | Already in the app, DirectML on any GPU | No RAM offload: the transformer must fit in video memory; few diffusion exports |
+| Embedded Python with PyTorch/diffusers | Every model, day one | Gigabytes of runtime, NVIDIA-centric, a second process to manage |
+
+The spike, in `spike/diffusion/` like the earlier ones: call stable-diffusion.cpp's C
+API from C# and generate 1024x1024 on the RTX 4060 8 GB / 64 GB desk with Z-Image Turbo
+Q4_K_M, FLUX.2 klein 4B and Qwen-Image Q4 with offload, on the Vulkan and the CUDA
+builds. Record time per image, peak video memory and RAM, whether a step callback and
+cancel work through the API, and the DLL size of each backend.
+
+The expected outcome is stable-diffusion.cpp, Vulkan by default and CUDA as an optional
+download for NVIDIA. The spike ends with that decision recorded and the next tasks
+re-scoped by it.
+
+### §PB78 A Revelei.Generation layer over the engine
+
+A new project, Revelei.Generation, beside Revelei.Inference and standing on
+Revelei.Imaging alone; `LayeringTests` gets its row, and only the app references it.
+
+It wraps the engine PB77 chose behind a small API: `GenerateAsync(GenerationRequest,
+IProgress<GenerationProgress>, CancellationToken) -> RgbaImage`, where the request names
+the model and quantisation, prompt, negative prompt where the model uses one, width,
+height, steps, guidance, sampler and seed, and offload on or off. Progress reports the
+stage (loading, encoding the prompt, step n of m, decoding) and, when the engine offers
+it, a low-resolution preview of the current step.
+
+The loaded model is kept, as `SessionCache` keeps ONNX sessions, until it is idle or
+another model is asked for, because loading a 12 GB model takes longer than one image.
+The native handle is owned by one SafeHandle and every call runs on one dedicated
+thread, since the engine is not thread-safe.
+
+Tests: the P/Invoke signatures against the header version pinned, a tiny model for an
+end-to-end generation in CI where one exists, and the real models skipped with the
+reason when `.cache\models` lacks them, as the existing model tests do.
+
+### §PB79 The first generation models in the catalog
+
+Start with the models that fit the owner's RTX 4060 8 GB and cover the range, each
+re-checked against its model card before it is listed:
+
+| Model | Why | License to confirm |
+| --- | --- | --- |
+| Z-Image Turbo (6B) | Good text in images, fast, about 7 GB peak at Q4 | Apache-2.0 |
+| FLUX.2 klein 4B | Smallest, 4 steps | Apache-2.0 for the 4B |
+| Qwen-Image 2512 (20B) | Best text rendering; runs here only with RAM offload | Apache-2.0 |
+
+Qwen-Image 2.1 is better still but listed as non-commercial research; it is added only
+with the non-commercial badge and after its terms are read. FLUX.2 dev stays out
+(non-commercial, needs about 40 GB).
+
+`scripts/publish-models.py` and `build-manifest.py` learn schema 2: GGUF files are not
+re-exported, so the script records each upstream file at a pinned commit with its size,
+SHA-256, role and memory figures (measured in the spike, PB77), pointing at the original
+repository where its license allows, as RMBG-1.4 already does, and re-hosting only when
+it must. The Python tests cover the new schema.
+
+### §PB80 The Create screen
+
+A Create mode beside the editor, reached from the toolbar and from the empty window
+("Open a photo or create one").
+
+Left column: the prompt (multi-line, kept between sessions), a negative prompt shown
+only for models that use one, the model picker listing installed generation models with
+their verdict (PB72) and a link to the Models panel when none is installed, the aspect
+ratio (1:1, 3:2, 2:3, 16:9, 9:16) with the resolution derived from what the model was
+trained on, steps and guidance with the model's defaults and a Reset, the seed with a
+dice to randomise and a lock to keep, and the number of images.
+
+Centre: the image as it forms, with the step preview PB78 reports, then the result;
+Generate turns into Cancel while running, and the status bar says the stage, step n of
+m, the elapsed time and, once one step is done, the time left. A run on a model whose
+verdict is Runs, slower says so before it starts.
+
+Below: a strip of this session's results; clicking one shows it with its prompt and
+settings, and Use these settings copies them back.
+
+The first time Create opens with no generation model, it offers the recommended one for
+this PC with its size and verdict, through the same consent pattern as the faces and
+background cards.
+
+### §PB81 Running out of memory during generation
+
+`MemoryFailures` already recognises out-of-memory from the ONNX side. The generation
+layer gets the same classification for the engine's errors, and an ordered fallback,
+each step logged and named in the status bar:
+
+1. Full GPU fails: retry with the transformer offloaded to RAM.
+2. Offload fails at this size: retry with VAE tiling (decoding in tiles), which is where most 8 GB cards run out at 1024 px and above.
+3. Still failing: say which memory ran out and offer the next quantisation down, or a smaller size, rather than switching to the CPU silently, since a 20B model on the CPU takes many minutes per image.
+
+System RAM is checked before loading against the catalog's figures (PB72), so a model
+that cannot fit is refused with the reason before anything loads, instead of Windows
+paging the whole machine to a halt. What worked is remembered per model and size, so the
+next run starts from it.
+
+### §PB82 From Create into the editor
+
+Each result has Edit, which opens it in the editor as if it were a photo, with the
+history starting from the generated image, so Upscale, Restore faces, Remove background,
+the basic edits and Export all apply as they do today.
+
+The prompt, negative prompt, model and quantisation, size, steps, guidance, sampler and
+seed are written into the exported file: a PNG `tEXt`/`iTXt` chunk (the convention other
+generators use, so their tools can read it), and XMP for JPEG and WebP. Opening a file
+that carries them in Create fills the settings back, and the editor shows a small
+"Generated with ..." line.
+
+Results are also saved automatically to a Generated folder (in Pictures by default,
+changeable), named by date and seed, so closing the app never loses an image; the export
+flow stays for choosing format and place.
+
+### §PB83 Shipping the engine
+
+The installer (`build/installer.iss`, `build-installer.cmd`) carries the engine build
+that runs everywhere, expected to be the Vulkan one from the spike (PB77), with its MIT
+license collected by `collect-notices.ps1` into the licenses folder and the About
+notices.
+
+A faster backend tied to one vendor, such as CUDA for NVIDIA, is too large to put in
+every installer. It becomes a catalog entry of kind `engine` (PB70), downloaded through
+the same queue (PB73), verified by SHA-256, and offered by the Models panel only when
+the detected GPU can use it, with the measured gain from the spike. The generation layer
+picks the best installed backend and falls back to the bundled one if the other fails to
+load.
+
+`BuildGateTests` and `InstallerTests` check that the bundled engine DLL is present and
+its version matches the header the P/Invoke layer was written against, and the README
+gains the requirements and the license of each generation model and of the engine.
