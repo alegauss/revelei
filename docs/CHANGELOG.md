@@ -106,3 +106,4 @@
 
 - ✅ **PB77** **No engine in Revelei can run a text-to-image diffusion model, let alone one bigger than 8 GB of video memory** — stable-diffusion.cpp generates 1024 px images from C# on the 8 GB desk, a 12 GB model by RAM offload; CUDA on NVIDIA, Vulkan elsewhere (design recorded in `spike/diffusion/README.md`).
 - ✅ **PB78** **Nothing in the app can turn a prompt into pixels: no layer loads a diffusion model, reports its steps or cancels it** — An engine host process generates with progress, previews and cancel; a crash fails one image only (design recorded in `src/Revelei.Generation/GenerationClient.cs`).
+- ✅ **PB79** **The catalog lists no text-to-image model, so there is nothing to download for generation** — Z-Image Turbo, FLUX.2 klein and Qwen-Image enter the catalog, each file pinned upstream with its hash, role and memory (design superseded: Qwen-Image 2512 became the Qwen-Image the spike ran).

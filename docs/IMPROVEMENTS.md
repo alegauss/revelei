@@ -88,27 +88,6 @@ two quantisations, served by the existing fixture server.
 
 ## Block J — Generate an image from a prompt
 
-### §PB79 The first generation models in the catalog
-
-Start with the models that fit the owner's RTX 4060 8 GB and cover the range, each
-re-checked against its model card before it is listed:
-
-| Model | Why | License to confirm |
-| --- | --- | --- |
-| Z-Image Turbo (6B) | Good text in images, fast, about 7 GB peak at Q4 | Apache-2.0 |
-| FLUX.2 klein 4B | Smallest, 4 steps | Apache-2.0 for the 4B |
-| Qwen-Image 2512 (20B) | Best text rendering; runs here only with RAM offload | Apache-2.0 |
-
-Qwen-Image 2.1 is better still but listed as non-commercial research; it is added only
-with the non-commercial badge and after its terms are read. FLUX.2 dev stays out
-(non-commercial, needs about 40 GB).
-
-`scripts/publish-models.py` and `build-manifest.py` learn schema 2: GGUF files are not
-re-exported, so the script records each upstream file at a pinned commit with its size,
-SHA-256, role and memory figures (measured in the spike, PB77), pointing at the original
-repository where its license allows, as RMBG-1.4 already does, and re-hosting only when
-it must. The Python tests cover the new schema.
-
 ### §PB80 The Create screen
 
 A Create mode beside the editor, reached from the toolbar and from the empty window

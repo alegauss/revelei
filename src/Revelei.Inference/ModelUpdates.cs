@@ -100,7 +100,7 @@ public static class ModelUpdates
         }
 
         // Downloaded before installed.json existed: the sizes are what tell.
-        bool sized = Sized(Path.Combine(folder, "meta.json"), listed.Meta)
+        bool sized = listed.Meta is { } meta && Sized(Path.Combine(folder, "meta.json"), meta)
             && listed.Variants.Any(v => Sized(Path.Combine(folder, v.Key + ".onnx"), v.Value));
         return sized ? UpdateState.UpToDate : UpdateState.UpdateAvailable;
     }
@@ -113,7 +113,7 @@ public static class ModelUpdates
         !Directory.Exists(root)
             ? []
             : [.. Directory.EnumerateDirectories(root)
-                .Where(folder => File.Exists(Path.Combine(folder, "meta.json")))
+                .Where(folder => File.Exists(Path.Combine(folder, "meta.json")) || File.Exists(Path.Combine(folder, InstalledRecord.FileName)))
                 .Select(Path.GetFileName)
                 .Order(StringComparer.Ordinal)
                 .Select(name => (name!, State(catalog, root, name!)))];
@@ -169,10 +169,14 @@ public static class ModelUpdates
     /// <summary>The folder inside a model's own where an update is staged until it is verified.</summary>
     public const string Staging = ".update";
 
+    // An ONNX model is its weights and meta.json; a diffusion model (PB79) is its files by role.
     private static bool SameFiles(InstalledRecord record, ManifestModel listed) =>
-        listed.Variants.TryGetValue(record.Quantisation, out ManifestFile? weights)
-        && record.Files.GetValueOrDefault(record.Quantisation + ".onnx") == weights.Sha256
-        && record.Files.GetValueOrDefault("meta.json") == listed.Meta.Sha256;
+        (listed.Meta is null || record.Files.GetValueOrDefault("meta.json") == listed.Meta.Sha256)
+        && (listed.Kind == ModelKind.Diffusion
+            ? listed.Quantisations?.GetValueOrDefault(record.Quantisation) is { } quantisation
+                && quantisation.Files.All(p => record.Files.GetValueOrDefault(p.Role) == p.File.Sha256)
+            : listed.Variants.TryGetValue(record.Quantisation, out ManifestFile? weights)
+                && record.Files.GetValueOrDefault(record.Quantisation + ".onnx") == weights.Sha256);
 
     private static bool Sized(string path, ManifestFile expected)
     {

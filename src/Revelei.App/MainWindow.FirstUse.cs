@@ -150,7 +150,7 @@ public partial class MainWindow
         ConsentLead.Text = $"To keep the installer small, {card.Operation.Title} downloads its AI {(card.Needed.Count == 1 ? "model" : "models")} the first time you use it: "
             + $"{DownloadText.Size(missing)}. After that it works offline, for every photo you open.";
         ConsentFiles.ItemsSource = card.Needed
-            .Select(m => $"{FirstUse.NameOf(m.Name)} · {DownloadText.Size(m.Meta.Bytes + m.Variants[ModelDownloads.Variant].Bytes)} · from {FirstUse.SourceOf(m.Variants[ModelDownloads.Variant])}")
+            .Select(m => $"{FirstUse.NameOf(m.Name)} · {DownloadText.Size((m.Meta?.Bytes ?? 0) + m.Variants[ModelDownloads.Variant].Bytes)} · from {FirstUse.SourceOf(m.Variants[ModelDownloads.Variant])}")
             .ToList();
         ConsentTotal.Text = (missing < total
             ? $"Total: {DownloadText.Size(missing)}, since {DownloadText.Size(total - missing)} of it is already here."

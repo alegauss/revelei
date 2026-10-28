@@ -72,6 +72,34 @@ class BuildManifestTests(unittest.TestCase):
         self.assertEqual(("2", "onnx", False), (model["version"], model["kind"], model["non_commercial"]))
         self.assertEqual([{"role": "weights", "file": manifest["models"][0]["variants"]["fp32"]}], model["quantisations"]["fp32"]["files"])
 
+    def test_the_generation_models_are_pinned_upstream_by_role(self):
+        # PB79: each quantisation is its transformer plus the shared text encoder and VAE.
+        sources = json.loads((SCRIPTS / "generation-sources.json").read_text(encoding="utf-8"))
+        entries = bm.diffusion(sources)
+        self.assertEqual(["z-image-turbo", "flux-2-klein-4b", "qwen-image"], [e["name"] for e in entries])
+        for entry in entries:
+            self.assertEqual(("diffusion", False), (entry["kind"], entry["non_commercial"]))
+            for quantisation in entry["quantisations"].values():
+                self.assertEqual(["transformer", "text-encoder", "vae"], [f["role"] for f in quantisation["files"]])
+                for listed in quantisation["files"]:
+                    self.assertRegex(listed["file"]["url"], r"^https://huggingface\.co/.+/resolve/[0-9a-f]{40}/")
+                    self.assertRegex(listed["file"]["sha256"], r"^[0-9a-f]{64}$")
+        qwen = entries[2]["quantisations"]["q4_0"]
+        self.assertEqual(11852773920 + (2 << 30), qwen["memory"]["video_bytes"])
+        self.assertEqual(4683072512 + 253806246 + (1 << 30), qwen["memory"]["system_bytes"])
+
+    def test_a_generation_file_not_pinned_to_a_commit_is_refused(self):
+        sources = json.loads((SCRIPTS / "generation-sources.json").read_text(encoding="utf-8"))
+        sources["models"][0]["quantisations"]["q4_k"]["commit"] = "main"
+        with self.assertRaises(bm.ManifestError):
+            bm.diffusion(sources)
+
+    def test_the_catalog_appends_the_generation_models(self):
+        manifest = bm.build(self.models, self.stage, "https://host", "1")
+        sources = json.loads((SCRIPTS / "generation-sources.json").read_text(encoding="utf-8"))
+        names = [m["name"] for m in bm.catalog(manifest, 1, generation=sources)["models"]]
+        self.assertEqual(["tiny-x4", "z-image-turbo", "flux-2-klein-4b", "qwen-image"], names)
+
     def test_a_catalog_sequence_below_1_is_refused(self):
         manifest = bm.build(self.models, self.stage, "https://host", "1")
         with self.assertRaises(bm.ManifestError):

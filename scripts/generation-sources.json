@@ -1,0 +1,51 @@
+{
+  "$comment": "PB79: the text-to-image models the catalog lists, each file pinned to an upstream commit with the size and SHA-256 Hugging Face's API gave on 2026-10-28, and each license read on its model card that day. GGUF files are not re-exported: the catalog points at the upstream repositories, all Apache-2.0. Memory is the rule the PB77 spike measured: video = the transformer plus the engine's 2 GiB compute reserve; system = text encoder and VAE plus 1 GiB. defaults are the steps and guidance each model was made for. build-manifest.py's catalog() adds these to schema 2.",
+  "models": [
+    {
+      "name": "z-image-turbo",
+      "version": "1",
+      "task": "text-to-image",
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+      "defaults": { "steps": 8, "guidance": 1.0 },
+      "shared": {
+        "text-encoder": { "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF", "commit": "a06e946bb6b655725eafa393f4a9745d460374c9", "path": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf", "bytes": 2497281120, "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597" },
+        "vae": { "repo": "Comfy-Org/Z-Image-Turbo", "commit": "6fc90a3b1b653e935a0d175e260736de25b84df5", "path": "split_files/vae/ae.safetensors", "bytes": 335304388, "sha256": "afc8e28272cd15db3919bacdb6918ce9c1ed22e96cb12c4d5ed0fba823529e38" }
+      },
+      "quantisations": {
+        "q4_k": { "repo": "leejet/Z-Image-Turbo-GGUF", "commit": "c61c0e422dc8b541b7548cf33a4ef8302b0f8085", "path": "z_image_turbo-Q4_K.gguf", "bytes": 3864250304, "sha256": "14b375ab4f226bc5378f68f37e899ef3c2242b8541e61e2bc1aff40976086fbd" },
+        "q8_0": { "repo": "leejet/Z-Image-Turbo-GGUF", "commit": "c61c0e422dc8b541b7548cf33a4ef8302b0f8085", "path": "z_image_turbo-Q8_0.gguf", "bytes": 6577440704, "sha256": "df1c5baa86d1398c979495a6072dbcee79444fdb884a2445582ba0769c44e9a1" }
+      }
+    },
+    {
+      "name": "flux-2-klein-4b",
+      "version": "1",
+      "task": "text-to-image",
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+      "defaults": { "steps": 4, "guidance": 1.0 },
+      "shared": {
+        "text-encoder": { "repo": "unsloth/Qwen3-4B-GGUF", "commit": "22c9fc8a8c7700b76a1789366280a6a5a1ad1120", "path": "Qwen3-4B-Q4_K_M.gguf", "bytes": 2497281312, "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a" },
+        "vae": { "repo": "Comfy-Org/Flux-2-Klein-4B", "commit": "5b3abca5c0dc1ecd4eaf3340868d09063fc1c965", "path": "split_files/vae/flux2-vae.safetensors", "bytes": 336211292, "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3" }
+      },
+      "quantisations": {
+        "q4_0": { "repo": "leejet/FLUX.2-klein-4B-GGUF", "commit": "3b1f5a9dc3abb32238b053aeb3d823c30afdacbd", "path": "flux-2-klein-4b-Q4_0.gguf", "bytes": 2460378560, "sha256": "d1023499ef3f2f82ff7c50e6778495195c1b6cc34835741778868428111f9ff4" }
+      }
+    },
+    {
+      "name": "qwen-image",
+      "version": "1",
+      "task": "text-to-image",
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/Qwen/Qwen-Image",
+      "defaults": { "steps": 20, "guidance": 2.5 },
+      "shared": {
+        "text-encoder": { "repo": "mradermacher/Qwen2.5-VL-7B-Instruct-GGUF", "commit": "cfa2baa09946b211c107e6e104948987a64dd2c1", "path": "Qwen2.5-VL-7B-Instruct.Q4_K_M.gguf", "bytes": 4683072512, "sha256": "0f00a930ba3108b6861ddadf74d8ebbd82e257c63eba728e62c3e8970f5eed94" },
+        "vae": { "repo": "Comfy-Org/Qwen-Image", "commit": "1f12b17be14c89b026c51a91d67c32f84bb047bc", "path": "split_files/vae/qwen_image_vae.safetensors", "bytes": 253806246, "sha256": "a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f" }
+      },
+      "quantisations": {
+        "q4_0": { "repo": "QuantStack/Qwen-Image-GGUF", "commit": "257f261fa92593bed760aa6fa3f7921a49fea00f", "path": "Qwen_Image-Q4_0.gguf", "bytes": 11852773920, "sha256": "ab0f20d548f3bfb197ec0f0f61c15acc2f0f865495fee2941c658fef4391cd61" }
+      }
+    }
+  ]
+}

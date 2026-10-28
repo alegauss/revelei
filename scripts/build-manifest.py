@@ -9,7 +9,7 @@ Reads every <models>/<name>/meta.json export-and-quantize.py wrote and writes
 
 PB70: with --sequence it also writes catalog.json, the same models in schema 2 (a version, a kind
 and files by role per quantisation), which scripts/sign-catalog.py signs and the app refreshes
-from. The sequence only ever grows: the app refuses a catalog below the one it embeds.
+from. PB79: it adds the text-to-image models scripts/generation-sources.json pins upstream. The sequence only ever grows: the app refuses a catalog below the one it embeds.
 
 Only the manifest is built here. Publishing is the owner's: the weights' licenses decide what
 may be redistributed (RMBG-1.4 is non-commercial under BRIA's terms), see model-sources.json.
@@ -28,6 +28,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 MODELS = REPO / ".cache" / "models"
 STAGE = REPO / ".cache" / "publish"
+GENERATION = REPO / "scripts" / "generation-sources.json"
+GIB = 1 << 30
 MANIFEST_SCHEMA = 1
 CATALOG_SCHEMA = 2
 
@@ -109,7 +111,55 @@ def build(
     return manifest
 
 
-def catalog(manifest: dict, sequence: int, versions: dict[str, str] | None = None) -> dict:
+def diffusion(sources: dict) -> list[dict]:
+    """PB79: generation-sources.json's text-to-image models as schema 2 catalog entries.
+
+    Each quantisation is its transformer plus the model's shared text encoder and VAE, every file
+    a resolve/<commit>/ URL on the upstream repository with its size and SHA-256. Memory follows
+    the PB77 spike: video is the transformer plus the engine's 2 GiB compute reserve, system the
+    text encoder and VAE plus 1 GiB.
+    """
+    entries = []
+    for model in sources["models"]:
+        shared = model["shared"]
+        missing = {"text-encoder", "vae"} - shared.keys()
+        if missing:
+            raise ManifestError(f"{model['name']}: no {', '.join(sorted(missing))} in generation-sources.json")
+        quantisations = {}
+        for name, transformer in model["quantisations"].items():
+            parts = [("transformer", transformer), ("text-encoder", shared["text-encoder"]), ("vae", shared["vae"])]
+            quantisations[name] = {
+                "memory": {
+                    "video_bytes": transformer["bytes"] + 2 * GIB,
+                    "system_bytes": shared["text-encoder"]["bytes"] + shared["vae"]["bytes"] + GIB,
+                },
+                "files": [{"role": role, "file": _upstream(source)} for role, source in parts],
+            }
+        entries.append(
+            {
+                "name": model["name"],
+                "version": model["version"],
+                "kind": "diffusion",
+                "task": model["task"],
+                "quantisations": quantisations,
+                "license": model["license"],
+                "license_url": model["license_url"],
+                "non_commercial": "non-commercial" in model["license"].lower(),
+                "defaults": model["defaults"],
+            }
+        )
+    return entries
+
+
+def _upstream(source: dict) -> dict:
+    commit = source["commit"]
+    if len(commit) != 40 or any(c not in "0123456789abcdef" for c in commit):
+        raise ManifestError(f"{source['repo']}/{source['path']}: {commit} is not a full commit, so the file could change")
+    url = f"https://huggingface.co/{source['repo']}/resolve/{commit}/{source['path']}"
+    return {"url": url, "bytes": source["bytes"], "sha256": source["sha256"]}
+
+
+def catalog(manifest: dict, sequence: int, versions: dict[str, str] | None = None, generation: dict | None = None) -> dict:
     """PB70: the schema 2 catalog over a schema 1 manifest's models.
 
     Each ONNX variant becomes a quantisation of one weights file. `versions` names a model's own
@@ -133,6 +183,8 @@ def catalog(manifest: dict, sequence: int, versions: dict[str, str] | None = Non
         }
         for m in manifest["models"]
     ]
+    if generation is not None:
+        models += diffusion(generation)
     return {"schema": CATALOG_SCHEMA, "version": manifest["version"], "sequence": sequence, "models": models}
 
 
@@ -148,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         manifest = build(args.models, args.stage, args.base_url, args.version, copy=not args.manifest_only)
         if args.sequence is not None:
-            written = catalog(manifest, args.sequence)
+            written = catalog(manifest, args.sequence, generation=json.loads(GENERATION.read_text(encoding="utf-8")))
             (args.stage / "catalog.json").write_text(json.dumps(written, indent=2) + "\n", encoding="utf-8", newline="\n")
     except ManifestError as error:
         print(f"ERROR {error}", file=sys.stderr)

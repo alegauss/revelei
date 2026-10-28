@@ -133,6 +133,28 @@ public sealed class ModelCatalogTests : IDisposable
         Assert.Equal(2048, catalog.Model("tiny-matte")!.Variants["fp32"].Bytes);
     }
 
+    [Fact]
+    public void TheGenerationModelsTheScriptsListGetTheVerdictsTheSpikeMeasured()
+    {
+        // PB79: scripts/generation-sources.json through build-manifest.py's catalog(). On the
+        // RTX 4060 8 GB desk Z-Image Turbo Q4 and FLUX.2 klein fit, and Qwen-Image runs by offload.
+        string fixture = Path.Combine(Repository.Root, "tests", "fixtures", "catalog");
+        ModelManifest catalog = ModelManifest.Parse(System.IO.File.ReadAllText(Path.Combine(fixture, "catalog.json")));
+        MachineProfile rtx4060 = new(8L << 30, 64L << 30, 500L << 30);
+
+        ManifestModel zImage = catalog.Model("z-image-turbo")!;
+        Assert.Equal((ModelKind.Diffusion, (ManifestFile?)null), (zImage.Kind, zImage.Meta));
+        Assert.Equal(["transformer", "text-encoder", "vae"], zImage.Quantisations!["q4_k"].Files.Select(f => f.Role));
+        Assert.Equal(("q4_k", Fit.RunsWell), Recommended(zImage));
+        Assert.Equal(Fit.RunsSlower, HardwareFit.Judge(zImage.Quantisations["q8_0"], rtx4060).Fit);
+        Assert.Equal(("q4_0", Fit.RunsWell), Recommended(catalog.Model("flux-2-klein-4b")!));
+        Assert.Equal(("q4_0", Fit.RunsSlower), Recommended(catalog.Model("qwen-image")!));
+        Assert.Equal("Generate", ModelCards.GroupOf(zImage));
+
+        (string, Fit) Recommended(ManifestModel model) =>
+            HardwareFit.Recommend(model, rtx4060) is { } chosen ? (chosen.Quantisation, chosen.Verdict.Fit) : (string.Empty, Fit.DoesNotFit);
+    }
+
     private static async Task<CatalogRefresh> Refresh(byte[] body, byte[] signature, string publicKey, ModelManifest floor)
     {
         using HttpClient http = new(new Served(new() { [Address.AbsoluteUri] = body, [Address.AbsoluteUri + ".sig"] = signature }));

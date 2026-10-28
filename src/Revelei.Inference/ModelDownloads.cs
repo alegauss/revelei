@@ -40,7 +40,7 @@ public enum ModelKind
 
 /// <summary>One model the manifest lists.</summary>
 /// <param name="Name">Its folder name.</param>
-/// <param name="Meta">Its meta.json.</param>
+/// <param name="Meta">Its meta.json; null for a diffusion model (PB79), which has none.</param>
 /// <param name="Variants">Its ONNX files, by variant.</param>
 /// <param name="License">Its license, as the About panel shows it.</param>
 /// <param name="ModelVersion">PB70: the model's own version, which an update compares; null in schema 1.</param>
@@ -51,7 +51,7 @@ public enum ModelKind
 /// <param name="Task">PB75: what it does (upscale, face-restore, background-removal, denoise...), which groups it.</param>
 public sealed record ManifestModel(
     string Name,
-    ManifestFile Meta,
+    ManifestFile? Meta,
     IReadOnlyDictionary<string, ManifestFile> Variants,
     string License,
     string? ModelVersion = null,
@@ -118,7 +118,7 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
     private static IEnumerable<ManifestFile> Listed(ManifestModel model) =>
         model.Variants.Values
             .Concat((model.Quantisations ?? new Dictionary<string, ManifestQuantisation>()).Values.SelectMany(q => q.Files.Select(p => p.File)))
-            .Append(model.Meta);
+            .Concat(model.Meta is { } meta ? [meta] : []);
 
     // Schema 1 lists one ONNX file per variant; read as a quantisation of weights alone, so
     // whatever reads quantisations reads both schemas alike. It has no non-commercial flag, so the
@@ -145,9 +145,9 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
         string Name,
         string Version,
         string Kind,
-        ManifestFile Meta,
         IReadOnlyDictionary<string, ManifestQuantisation> Quantisations,
         string License,
+        ManifestFile? Meta = null,
         bool NonCommercial = false,
         string? Note = null,
         string? Task = null)
@@ -161,10 +161,16 @@ public sealed record ModelManifest(int Schema, string Version, IReadOnlyList<Man
                 _ => throw new InvalidDataException($"{Name} is of kind {Kind}, which this build cannot run."),
             };
 
-            // An ONNX model is still one file per quantisation, which is what downloads fetch today.
+            // An ONNX model is still one file per quantisation, which is what downloads fetch today,
+            // with the meta.json its pipeline reads.
             Dictionary<string, ManifestFile> variants = [];
             if (kind == ModelKind.Onnx)
             {
+                if (Meta is null)
+                {
+                    throw new InvalidDataException($"{Name} is an ONNX model and lists no meta.json.");
+                }
+
                 foreach ((string quantisation, ManifestQuantisation listed) in Quantisations)
                 {
                     variants[quantisation] = listed.Files.SingleOrDefault(p => p.Role == Weights)?.File
@@ -276,7 +282,7 @@ public static class ModelDownloads
     public static long TotalBytes(ModelManifest manifest, IReadOnlyCollection<string>? models = null)
     {
         ArgumentNullException.ThrowIfNull(manifest);
-        return Selected(manifest, models).Sum(m => m.Meta.Bytes + (m.Variants.TryGetValue(Variant, out ManifestFile? f) ? f.Bytes : 0));
+        return Selected(manifest, models).Sum(m => (m.Meta?.Bytes ?? 0) + (m.Variants.TryGetValue(Variant, out ManifestFile? f) ? f.Bytes : 0));
     }
 
     /// <summary>Whether every file the variant needs is on disk with the right bytes.</summary>
@@ -409,8 +415,11 @@ public static class ModelDownloads
         ManifestQuantisation chosen = listed.Quantisations?.GetValueOrDefault(quantisation) ?? throw new InvalidOperationException($"The catalog lists no {quantisation} of {model}.");
         string folder = Path.Combine(root, model);
         List<(string Path, string Label, ManifestFile Expected)> files =
-            [.. chosen.Files.DistinctBy(p => p.File.Sha256).Select(p => (Path.Combine(root, SharedFolder, p.File.Sha256), $"{model}/{p.Role}", p.File)),
-             (Path.Combine(folder, "meta.json"), $"{model}/meta.json", listed.Meta)];
+            [.. chosen.Files.DistinctBy(p => p.File.Sha256).Select(p => (Path.Combine(root, SharedFolder, p.File.Sha256), $"{model}/{p.Role}", p.File))];
+        if (listed.Meta is { } meta)
+        {
+            files.Add((Path.Combine(folder, "meta.json"), $"{model}/meta.json", meta));
+        }
 
         long total = files.Sum(f => f.Expected.Bytes);
         long needed = files.Where(f => !Sized(f.Path, f.Expected)).Sum(f => f.Expected.Bytes - Math.Min(PartialBytes(f.Path), f.Expected.Bytes));
@@ -436,7 +445,12 @@ public static class ModelDownloads
         }
 
         Dictionary<string, string> uses = chosen.Files.ToDictionary(p => p.Role, p => p.File.Sha256, StringComparer.Ordinal);
-        uses["meta.json"] = listed.Meta.Sha256;
+        if (listed.Meta is { } listedMeta)
+        {
+            uses["meta.json"] = listedMeta.Sha256;
+        }
+
+        Directory.CreateDirectory(folder);
         new InstalledRecord(ModelUpdates.VersionOf(listed), quantisation, DateTimeOffset.Now, uses).Write(folder);
         return new DownloadResult(fetched, present);
     }
@@ -624,13 +638,14 @@ public static class ModelDownloads
             string[] paths = [.. Files(manifest, root, [model.Name]).Select(f => f.Path)];
             string folder = Path.Combine(root, model.Name);
             if (!model.Variants.TryGetValue(Variant, out ManifestFile? weights)
+                || model.Meta is not { } meta
                 || !paths.All(atRoot.Contains)
                 || (!paths.Any(fetchedNow.Contains) && InstalledRecord.Read(folder) is not null))
             {
                 continue;
             }
 
-            Dictionary<string, string> files = new(StringComparer.Ordinal) { [Variant + ".onnx"] = weights.Sha256, ["meta.json"] = model.Meta.Sha256 };
+            Dictionary<string, string> files = new(StringComparer.Ordinal) { [Variant + ".onnx"] = weights.Sha256, ["meta.json"] = meta.Sha256 };
             new InstalledRecord(ModelUpdates.VersionOf(model), Variant, DateTimeOffset.Now, files).Write(folder);
         }
     }
@@ -657,7 +672,10 @@ public static class ModelDownloads
             }
 
             // After the ONNX file, so a model folder never holds a meta.json without its variant.
-            yield return (Path.Combine(root, model.Name, "meta.json"), $"{model.Name}/meta.json", model.Meta);
+            if (model.Meta is { } meta)
+            {
+                yield return (Path.Combine(root, model.Name, "meta.json"), $"{model.Name}/meta.json", meta);
+            }
         }
     }
 

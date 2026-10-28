@@ -119,7 +119,7 @@ public static class ModelCards
     private static ModelCard Card(ManifestModel model, string root, string? bundled, MachineProfile machine, ModelManifest catalog)
     {
         string folder = Path.Combine(root, model.Name);
-        bool downloaded = File.Exists(Path.Combine(folder, "meta.json"));
+        bool downloaded = File.Exists(Path.Combine(folder, "meta.json")) || File.Exists(Path.Combine(folder, InstalledRecord.FileName));
         bool fromInstaller = bundled is not null && File.Exists(Path.Combine(bundled, model.Name, "meta.json"));
         InstalledRecord? record = InstalledRecord.Read(folder);
         (string Quantisation, FitVerdict Verdict)? recommended = HardwareFit.Recommend(model, machine);
@@ -128,7 +128,7 @@ public static class ModelCards
             ? HardwareFit.Judge(chosen, machine, installed: downloaded || fromInstaller)
             : null;
         long download = quantisation is not null && model.Quantisations?.GetValueOrDefault(quantisation) is { } listed
-            ? listed.Files.Sum(f => f.File.Bytes) + model.Meta.Bytes
+            ? listed.Files.Sum(f => f.File.Bytes) + (model.Meta?.Bytes ?? 0)
             : 0;
 
         return new ModelCard(

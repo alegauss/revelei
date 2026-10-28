@@ -58,6 +58,179 @@
       "license": "bria-rmbg-1.4 (non-commercial)",
       "license_url": "https://host/LICENSE",
       "non_commercial": true
+    },
+    {
+      "name": "z-image-turbo",
+      "version": "1",
+      "kind": "diffusion",
+      "task": "text-to-image",
+      "quantisations": {
+        "q4_k": {
+          "memory": {
+            "video_bytes": 6011733952,
+            "system_bytes": 3906327332
+          },
+          "files": [
+            {
+              "role": "transformer",
+              "file": {
+                "url": "https://huggingface.co/leejet/Z-Image-Turbo-GGUF/resolve/c61c0e422dc8b541b7548cf33a4ef8302b0f8085/z_image_turbo-Q4_K.gguf",
+                "bytes": 3864250304,
+                "sha256": "14b375ab4f226bc5378f68f37e899ef3c2242b8541e61e2bc1aff40976086fbd"
+              }
+            },
+            {
+              "role": "text-encoder",
+              "file": {
+                "url": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+                "bytes": 2497281120,
+                "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+              }
+            },
+            {
+              "role": "vae",
+              "file": {
+                "url": "https://huggingface.co/Comfy-Org/Z-Image-Turbo/resolve/6fc90a3b1b653e935a0d175e260736de25b84df5/split_files/vae/ae.safetensors",
+                "bytes": 335304388,
+                "sha256": "afc8e28272cd15db3919bacdb6918ce9c1ed22e96cb12c4d5ed0fba823529e38"
+              }
+            }
+          ]
+        },
+        "q8_0": {
+          "memory": {
+            "video_bytes": 8724924352,
+            "system_bytes": 3906327332
+          },
+          "files": [
+            {
+              "role": "transformer",
+              "file": {
+                "url": "https://huggingface.co/leejet/Z-Image-Turbo-GGUF/resolve/c61c0e422dc8b541b7548cf33a4ef8302b0f8085/z_image_turbo-Q8_0.gguf",
+                "bytes": 6577440704,
+                "sha256": "df1c5baa86d1398c979495a6072dbcee79444fdb884a2445582ba0769c44e9a1"
+              }
+            },
+            {
+              "role": "text-encoder",
+              "file": {
+                "url": "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/a06e946bb6b655725eafa393f4a9745d460374c9/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+                "bytes": 2497281120,
+                "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+              }
+            },
+            {
+              "role": "vae",
+              "file": {
+                "url": "https://huggingface.co/Comfy-Org/Z-Image-Turbo/resolve/6fc90a3b1b653e935a0d175e260736de25b84df5/split_files/vae/ae.safetensors",
+                "bytes": 335304388,
+                "sha256": "afc8e28272cd15db3919bacdb6918ce9c1ed22e96cb12c4d5ed0fba823529e38"
+              }
+            }
+          ]
+        }
+      },
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+      "non_commercial": false,
+      "defaults": {
+        "steps": 8,
+        "guidance": 1.0
+      }
+    },
+    {
+      "name": "flux-2-klein-4b",
+      "version": "1",
+      "kind": "diffusion",
+      "task": "text-to-image",
+      "quantisations": {
+        "q4_0": {
+          "memory": {
+            "video_bytes": 4607862208,
+            "system_bytes": 3907234428
+          },
+          "files": [
+            {
+              "role": "transformer",
+              "file": {
+                "url": "https://huggingface.co/leejet/FLUX.2-klein-4B-GGUF/resolve/3b1f5a9dc3abb32238b053aeb3d823c30afdacbd/flux-2-klein-4b-Q4_0.gguf",
+                "bytes": 2460378560,
+                "sha256": "d1023499ef3f2f82ff7c50e6778495195c1b6cc34835741778868428111f9ff4"
+              }
+            },
+            {
+              "role": "text-encoder",
+              "file": {
+                "url": "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/22c9fc8a8c7700b76a1789366280a6a5a1ad1120/Qwen3-4B-Q4_K_M.gguf",
+                "bytes": 2497281312,
+                "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a"
+              }
+            },
+            {
+              "role": "vae",
+              "file": {
+                "url": "https://huggingface.co/Comfy-Org/Flux-2-Klein-4B/resolve/5b3abca5c0dc1ecd4eaf3340868d09063fc1c965/split_files/vae/flux2-vae.safetensors",
+                "bytes": 336211292,
+                "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3"
+              }
+            }
+          ]
+        }
+      },
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+      "non_commercial": false,
+      "defaults": {
+        "steps": 4,
+        "guidance": 1.0
+      }
+    },
+    {
+      "name": "qwen-image",
+      "version": "1",
+      "kind": "diffusion",
+      "task": "text-to-image",
+      "quantisations": {
+        "q4_0": {
+          "memory": {
+            "video_bytes": 14000257568,
+            "system_bytes": 6010620582
+          },
+          "files": [
+            {
+              "role": "transformer",
+              "file": {
+                "url": "https://huggingface.co/QuantStack/Qwen-Image-GGUF/resolve/257f261fa92593bed760aa6fa3f7921a49fea00f/Qwen_Image-Q4_0.gguf",
+                "bytes": 11852773920,
+                "sha256": "ab0f20d548f3bfb197ec0f0f61c15acc2f0f865495fee2941c658fef4391cd61"
+              }
+            },
+            {
+              "role": "text-encoder",
+              "file": {
+                "url": "https://huggingface.co/mradermacher/Qwen2.5-VL-7B-Instruct-GGUF/resolve/cfa2baa09946b211c107e6e104948987a64dd2c1/Qwen2.5-VL-7B-Instruct.Q4_K_M.gguf",
+                "bytes": 4683072512,
+                "sha256": "0f00a930ba3108b6861ddadf74d8ebbd82e257c63eba728e62c3e8970f5eed94"
+              }
+            },
+            {
+              "role": "vae",
+              "file": {
+                "url": "https://huggingface.co/Comfy-Org/Qwen-Image/resolve/1f12b17be14c89b026c51a91d67c32f84bb047bc/split_files/vae/qwen_image_vae.safetensors",
+                "bytes": 253806246,
+                "sha256": "a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f"
+              }
+            }
+          ]
+        }
+      },
+      "license": "Apache-2.0",
+      "license_url": "https://huggingface.co/Qwen/Qwen-Image",
+      "non_commercial": false,
+      "defaults": {
+        "steps": 20,
+        "guidance": 2.5
+      }
     }
   ]
 }
