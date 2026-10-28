@@ -104,3 +104,4 @@
 
 ## Block J — Generate an image from a prompt
 
+- ✅ **PB77** **No engine in Revelei can run a text-to-image diffusion model, let alone one bigger than 8 GB of video memory** — stable-diffusion.cpp generates 1024 px images from C# on the 8 GB desk, a 12 GB model by RAM offload; CUDA on NVIDIA, Vulkan elsewhere (design recorded in `spike/diffusion/README.md`).

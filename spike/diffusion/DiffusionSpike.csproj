@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- PB77: a record of the diffusion engine spike, outside the solution like spike/onnx-runtime.
+       It calls stable-diffusion.cpp's C API from C#; the DLLs and models are fetched by hand
+       (README.md) and never committed. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Revelei.Spike.Diffusion</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CA1515;CA1812;CA1303;CA2000;CA1707;CA1051;CA1815;CA1401;SYSLIB1054;CA2101;CA1806;CA1031;CA1305;CA1861;CA1849;CA2007</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
+  </ItemGroup>
+
+</Project>

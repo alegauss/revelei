@@ -88,27 +88,6 @@ two quantisations, served by the existing fixture server.
 
 ## Block J — Generate an image from a prompt
 
-### §PB77 Spike: which engine runs generation inside Revelei
-
-The goal is that a person installs Revelei and nothing else: no Python, no ComfyUI.
-Three candidates:
-
-| Engine | For | Against |
-| --- | --- | --- |
-| **stable-diffusion.cpp** (MIT, C/C++, ggml) | One native DLL called by P/Invoke; GGUF quantisations; `--offload-to-cpu`; Z-Image, Qwen-Image (2512 and 2.1), FLUX.2 klein, SD3.5 and SDXL supported; Vulkan backend for any GPU, CUDA for NVIDIA | Native code to ship and keep up to date; offload on Vulkan unverified |
-| ONNX via Windows ML (what runs today) | Already in the app, DirectML on any GPU | No RAM offload: the transformer must fit in video memory; few diffusion exports |
-| Embedded Python with PyTorch/diffusers | Every model, day one | Gigabytes of runtime, NVIDIA-centric, a second process to manage |
-
-The spike, in `spike/diffusion/` like the earlier ones: call stable-diffusion.cpp's C
-API from C# and generate 1024x1024 on the RTX 4060 8 GB / 64 GB desk with Z-Image Turbo
-Q4_K_M, FLUX.2 klein 4B and Qwen-Image Q4 with offload, on the Vulkan and the CUDA
-builds. Record time per image, peak video memory and RAM, whether a step callback and
-cancel work through the API, and the DLL size of each backend.
-
-The expected outcome is stable-diffusion.cpp, Vulkan by default and CUDA as an optional
-download for NVIDIA. The spike ends with that decision recorded and the next tasks
-re-scoped by it.
-
 ### §PB78 A Revelei.Generation layer over the engine
 
 A new project, Revelei.Generation, beside Revelei.Inference and standing on
@@ -123,8 +102,10 @@ it, a low-resolution preview of the current step.
 
 The loaded model is kept, as `SessionCache` keeps ONNX sessions, until it is idle or
 another model is asked for, because loading a 12 GB model takes longer than one image.
-The native handle is owned by one SafeHandle and every call runs on one dedicated
-thread, since the engine is not thread-safe.
+Per the spike (spike/diffusion/README.md) the engine runs in a small host process the
+layer talks to over a pipe: the struct layout is pinned to one engine release, a native
+crash ends only the host, and a cancel that does not land is a kill. Inside it one
+thread owns the context. Loading and VAE tiles also arrive as progress steps.
 
 Tests: the P/Invoke signatures against the header version pinned, a tiny model for an
 end-to-end generation in CI where one exists, and the real models skipped with the
@@ -181,6 +162,10 @@ background cards.
 layer gets the same classification for the engine's errors, and an ordered fallback,
 each step logged and named in the status bar:
 
+The engine already does the first two on its own (spike/diffusion/README.md): auto-fit
+streams what does not fit from RAM, and a VAE decode that runs out retries in tiles; the
+layer names them when the log says so.
+
 1. Full GPU fails: retry with the transformer offloaded to RAM.
 2. Offload fails at this size: retry with VAE tiling (decoding in tiles), which is where most 8 GB cards run out at 1024 px and above.
 3. Still failing: say which memory ran out and offer the next quantisation down, or a smaller size, rather than switching to the CPU silently, since a 20B model on the CPU takes many minutes per image.
@@ -209,8 +194,9 @@ flow stays for choosing format and place.
 ### §PB83 Shipping the engine
 
 The installer (`build/installer.iss`, `build-installer.cmd`) carries the engine build
-that runs everywhere, expected to be the Vulkan one from the spike (PB77), with its MIT
-license collected by `collect-notices.ps1` into the licenses folder and the About
+that runs everywhere, the Vulkan one, 85 MB unpacked (spike/diffusion/README.md); CUDA,
+914 MB zipped and 12 times faster at 1024 px on NVIDIA, is the download below, with its
+MIT license collected by `collect-notices.ps1` into the licenses folder and the About
 notices.
 
 A faster backend tied to one vendor, such as CUDA for NVIDIA, is too large to put in
