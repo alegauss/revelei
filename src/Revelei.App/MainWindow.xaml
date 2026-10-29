@@ -463,6 +463,11 @@
             <StackPanel x:Name="CreateNoModel" Visibility="Collapsed" Margin="0,0,0,12">
               <TextBlock x:Name="CreateNoModelText" AutomationProperties.AutomationId="CreateNoModelText" TextWrapping="Wrap"
                          Text="No image generation model is on this PC yet. The Models panel lists them, with how each runs here." />
+              <!-- PB80: the model this PC runs best, offered with its size, verdict and license. -->
+              <TextBlock x:Name="CreateRecommended" AutomationProperties.AutomationId="CreateRecommended" TextWrapping="Wrap"
+                         Margin="0,8,0,0" Visibility="Collapsed" />
+              <Button x:Name="CreateDownloadRecommended" AutomationProperties.AutomationId="CreateDownloadRecommended"
+                      HorizontalAlignment="Left" Padding="12,4" Margin="0,8,0,0" Visibility="Collapsed" Click="OnCreateDownloadRecommendedClick" />
               <Button x:Name="CreateOpenModels" AutomationProperties.AutomationId="CreateOpenModels" Content="Open Models"
                       HorizontalAlignment="Left" Padding="12,4" Margin="0,8,0,0" Click="OnModelsClick" />
             </StackPanel>
@@ -475,6 +480,12 @@
             <TextBox x:Name="CreatePrompt" AutomationProperties.AutomationId="CreatePrompt" AutomationProperties.Name="Prompt"
                      AcceptsReturn="True" TextWrapping="Wrap" MinHeight="96" MaxHeight="220" VerticalScrollBarVisibility="Auto"
                      Margin="0,2,0,10" />
+            <!-- PB80: what to avoid, for a model that takes guidance above 1 and so reads one. -->
+            <StackPanel x:Name="CreateNegativeRow" Visibility="Collapsed">
+              <TextBlock Text="Avoid" Style="{StaticResource StatCaption}" />
+              <TextBox x:Name="CreateNegative" AutomationProperties.AutomationId="CreateNegative" AutomationProperties.Name="Avoid"
+                       TextWrapping="Wrap" Margin="0,2,0,10" />
+            </StackPanel>
             <TextBlock Text="Shape" Style="{StaticResource StatCaption}" />
             <ComboBox x:Name="CreateAspect" AutomationProperties.AutomationId="CreateAspect" AutomationProperties.Name="Shape"
                       DisplayMemberPath="Label" Margin="0,2,0,10" />
@@ -502,7 +513,10 @@
               <TextBox x:Name="CreateSeed" AutomationProperties.AutomationId="CreateSeed" AutomationProperties.Name="Seed" />
             </DockPanel>
             <CheckBox x:Name="CreateSeedLock" AutomationProperties.AutomationId="CreateSeedLock" Content="Keep this seed"
-                      Margin="0,0,0,10" ToolTip="Off, each image takes a new seed" />
+                      Margin="0,0,0,10" ToolTip="Off, each run takes a new seed" />
+            <TextBlock Text="Images" Style="{StaticResource StatCaption}" />
+            <ComboBox x:Name="CreateCount" AutomationProperties.AutomationId="CreateCount" AutomationProperties.Name="Images"
+                      Margin="0,2,0,10" ToolTip="Each takes the next seed, so every one can be made again" />
             <Button x:Name="CreateReset" AutomationProperties.AutomationId="CreateReset" Content="Reset to the model's settings"
                     HorizontalAlignment="Left" Padding="10,2" Margin="0,0,0,14" Click="OnCreateResetClick" />
             <Button x:Name="CreateGenerate" AutomationProperties.AutomationId="CreateGenerate" Content="Generate"
@@ -510,6 +524,26 @@
           </StackPanel>
         </Border>
         <DockPanel Margin="16,0,0,0">
+          <!-- PB80: this session's results; choosing one shows it with its settings, which Use
+               these settings copies back. -->
+          <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+            <Button x:Name="CreateUseSettings" AutomationProperties.AutomationId="CreateUseSettings" DockPanel.Dock="Right"
+                    Content="Use these settings" Padding="10,2" VerticalAlignment="Center" IsEnabled="False" Click="OnCreateUseSettingsClick" />
+            <ListBox x:Name="CreateResults" AutomationProperties.AutomationId="CreateResults" AutomationProperties.Name="This session's images"
+                     Height="92" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="OnCreateResultChanged">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <VirtualizingStackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Image Source="{Binding Thumbnail}" Height="80" Stretch="Uniform" ToolTip="{Binding Label}" />
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
           <TextBlock x:Name="CreateStatus" AutomationProperties.AutomationId="CreateStatus" DockPanel.Dock="Bottom"
                      Style="{StaticResource StatCaption}" TextWrapping="Wrap" Margin="0,8,0,0" />
           <Border Style="{StaticResource GroupCard}">

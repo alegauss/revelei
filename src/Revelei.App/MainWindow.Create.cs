@@ -33,6 +33,25 @@ public sealed record CreateShape(string Label, int Width, int Height)
     public override string ToString() => Label;
 }
 
+/// <summary>One image this session made, with what made it (PB80).</summary>
+/// <param name="Image">The image.</param>
+/// <param name="Thumbnail">The strip's copy.</param>
+/// <param name="Prompt">Its prompt.</param>
+/// <param name="Model">The model's folder name.</param>
+/// <param name="Shape">Its shape.</param>
+/// <param name="Steps">Its steps.</param>
+/// <param name="Guidance">Its guidance.</param>
+/// <param name="Seed">Its seed, which with the rest makes it again.</param>
+public sealed record CreateResult(BitmapSource Image, BitmapSource Thumbnail, string Prompt, string Model, CreateShape Shape, int Steps, float Guidance, long Seed)
+{
+    /// <summary>What the strip says of it.</summary>
+    public string Label => string.Create(CultureInfo.CurrentCulture, $"Seed {Seed} · {Shape.Width} × {Shape.Height}");
+
+    /// <summary>The label, which is also its accessible name in the strip.</summary>
+    /// <returns>The label.</returns>
+    public override string ToString() => Label;
+}
+
 /// <summary>An installed generation model as the picker lists it.</summary>
 /// <param name="Model">The model.</param>
 public sealed record CreateModelChoice(GenerationModel Model)
@@ -61,6 +80,10 @@ public partial class MainWindow
     private CancellationTokenSource? generating;
 
     private DispatcherTimer? createIdle;
+
+    private readonly System.Collections.ObjectModel.ObservableCollection<CreateResult> createResults = [];
+
+    private (string Model, string Quantisation)? recommended;
 
     private void OnCreateClick(object sender, RoutedEventArgs e)
     {
@@ -101,11 +124,15 @@ public partial class MainWindow
         CreateModel.ItemsSource = models;
         CreateModel.SelectedItem = models.FirstOrDefault(m => m.Model.Name == chosen) ?? models.FirstOrDefault();
         CreateNoModel.Visibility = models.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        OfferRecommended(models.Count == 0);
 
         if (CreateAspect.ItemsSource is null)
         {
             CreateAspect.ItemsSource = CreateShape.All;
             CreateAspect.SelectedIndex = 0;
+            CreateCount.ItemsSource = (int[])[1, 2, 3, 4];
+            CreateCount.SelectedIndex = 0;
+            CreateResults.ItemsSource = createResults;
             CreatePrompt.Text = AppSettings.Load(AppSettings.DefaultPath).Prompt ?? string.Empty;
             CreateSeed.Text = NewSeed();
         }
@@ -118,12 +145,77 @@ public partial class MainWindow
         }
     }
 
+    // With no model installed, the generation model this PC runs best (GenerationModels.Recommend).
+    private void OfferRecommended(bool none)
+    {
+        recommended = null;
+        if (none && machine is not null)
+        {
+            if (GenerationModels.Recommend(Manifest, machine) is { } choice && choice.Model is { } best)
+            {
+                long bytes = best.Quantisations![choice.Quantisation].Files.Sum(f => f.File.Bytes);
+                recommended = (best.Name, choice.Quantisation);
+                CreateRecommended.Text = $"Recommended for this PC: {FirstUse.NameOf(best.Name)} ({choice.Quantisation}), {DownloadText.Size(bytes)} to download, {best.License}. {choice.Verdict.Reason}";
+                CreateDownloadRecommended.Content = $"Download {FirstUse.NameOf(best.Name)}";
+            }
+        }
+
+        Visibility offered = recommended is null ? Visibility.Collapsed : Visibility.Visible;
+        CreateRecommended.Visibility = offered;
+        CreateDownloadRecommended.Visibility = offered;
+        CreateDownloadRecommended.IsEnabled = !Queue.Items.Any(q => q.Model == recommended?.Model);
+    }
+
+    private void OnCreateDownloadRecommendedClick(object sender, RoutedEventArgs e)
+    {
+        if (recommended is { } offer)
+        {
+            Queue.Enqueue(offer.Model, offer.Quantisation);
+            CreateDownloadRecommended.IsEnabled = false;
+            CreateStatus.Text = "Downloading. The Models panel shows how far it is, and Create offers it once it is in.";
+            RunQueue();
+        }
+    }
+
+    private void OnCreateResultChanged(object sender, SelectionChangedEventArgs e)
+    {
+        CreateUseSettings.IsEnabled = CreateResults.SelectedItem is CreateResult;
+        if (CreateResults.SelectedItem is CreateResult result && generating is null)
+        {
+            CreateImage.Source = result.Image;
+            CreateStatus.Text = string.Create(CultureInfo.CurrentCulture, $"{FirstUse.NameOf(result.Model)} · {result.Shape.Width} × {result.Shape.Height} · {result.Steps} steps · guidance {result.Guidance:0.0#} · seed {result.Seed} · {result.Prompt}");
+        }
+    }
+
+    private void OnCreateUseSettingsClick(object sender, RoutedEventArgs e)
+    {
+        if (CreateResults.SelectedItem is not CreateResult result)
+        {
+            return;
+        }
+
+        if (CreateModel.ItemsSource is IEnumerable<CreateModelChoice> models && models.FirstOrDefault(m => m.Model.Name == result.Model) is { } model)
+        {
+            CreateModel.SelectedItem = model;
+        }
+
+        CreatePrompt.Text = result.Prompt;
+        CreateAspect.SelectedItem = result.Shape;
+        CreateSteps.Text = result.Steps.ToString(CultureInfo.CurrentCulture);
+        CreateGuidance.Text = result.Guidance.ToString("0.0#", CultureInfo.CurrentCulture);
+        CreateSeed.Text = result.Seed.ToString(CultureInfo.InvariantCulture);
+        CreateSeedLock.IsChecked = true;
+    }
+
     private void OnCreateModelChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CreateModel.SelectedItem is CreateModelChoice choice)
         {
             ResetCreateSettings(choice.Model);
             CreateFit.Text = choice.Model.Verdict is { } verdict ? verdict.Reason : string.Empty;
+
+            // A distilled model (guidance 1) ignores a negative prompt, so it is only asked of the others.
+            CreateNegativeRow.Visibility = choice.Model.Defaults.Guidance > 1 ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
@@ -176,7 +268,7 @@ public partial class MainWindow
 
         (AppSettings.Load(AppSettings.DefaultPath) with { Prompt = prompt }).Save(AppSettings.DefaultPath);
         bool offload = model.Verdict?.Fit == Fit.RunsSlower;
-        GenerationRequest request = new(model.Transformer, model.TextEncoder, model.Vae, prompt, shape.Width, shape.Height, steps, guidance, seed, offload);
+        int count = CreateCount.SelectedItem is int chosenCount ? chosenCount : 1;
 
         createIdle?.Stop();
         generating = new CancellationTokenSource();
@@ -199,9 +291,23 @@ public partial class MainWindow
         try
         {
             generation ??= new GenerationClient(Path.Combine(AppContext.BaseDirectory, "Revelei.Generation.Host.exe"), Options.EngineArguments!);
-            RgbaImage image = await generation.GenerateAsync(request, progress, generating.Token, preview).ConfigureAwait(true);
-            CreateImage.Source = Bitmap(image);
-            CreateStatus.Text = string.Create(CultureInfo.CurrentCulture, $"Done in {clock.Elapsed.TotalSeconds:0} s · {image.Width} × {image.Height} · seed {seed}.");
+            RgbaImage? image = null;
+
+            // Each image takes the next seed, so every one of them can be made again from its own.
+            for (int i = 0; i < count; i++)
+            {
+                firstStep = null;
+                GenerationRequest request = new(
+                    model.Transformer, model.TextEncoder, model.Vae, prompt, shape.Width, shape.Height, steps, guidance, seed + i, offload,
+                    CreateNegativeRow.Visibility == Visibility.Visible && CreateNegative.Text.Trim() is { Length: > 0 } avoid ? avoid : null);
+                image = await generation.GenerateAsync(request, progress, generating.Token, preview).ConfigureAwait(true);
+                BitmapSource shown = Bitmap(image);
+                CreateImage.Source = shown;
+                createResults.Add(new CreateResult(shown, Thumbnail(shown), prompt, model.Name, shape, steps, guidance, seed + i));
+            }
+
+            string seeds = count == 1 ? $"seed {seed}" : $"seeds {seed} to {seed + count - 1}";
+            CreateStatus.Text = string.Create(CultureInfo.CurrentCulture, $"Done in {clock.Elapsed.TotalSeconds:0} s · {image!.Width} × {image.Height} · {seeds}.");
             if (CreateSeedLock.IsChecked != true)
             {
                 CreateSeed.Text = NewSeed();
@@ -244,6 +350,14 @@ public partial class MainWindow
             createIdle?.Stop();
             await client.DisposeAsync().ConfigureAwait(true);
         }
+    }
+
+    private static TransformedBitmap Thumbnail(BitmapSource image)
+    {
+        double scale = 160.0 / Math.Max(image.PixelWidth, image.PixelHeight);
+        TransformedBitmap small = new(image, new ScaleTransform(scale, scale));
+        small.Freeze();
+        return small;
     }
 
     private static BitmapSource Bitmap(RgbaImage image)

@@ -159,6 +159,11 @@ public partial class MainWindow
                 FillModels();
             }
 
+            if (CreatePanel.Visibility == Visibility.Visible)
+            {
+                FillCreate(); // PB80: a model downloaded from Create's offer is offered there at once.
+            }
+
             RefreshOperations();
         }
     }

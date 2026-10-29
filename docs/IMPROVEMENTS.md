@@ -88,33 +88,6 @@ two quantisations, served by the existing fixture server.
 
 ## Block J — Generate an image from a prompt
 
-### §PB80 The Create screen
-
-A Create mode beside the editor, reached from the toolbar and from the empty window
-("Open a photo or create one").
-
-Left column: the prompt (multi-line, kept between sessions), a negative prompt shown
-only for models that use one, the model picker listing installed generation models with
-their verdict (PB72) and a link to the Models panel when none is installed, the aspect
-ratio (1:1, 3:2, 2:3, 16:9, 9:16) with the resolution derived from what the model was
-trained on, steps and guidance with the model's defaults and a Reset, the seed with a
-dice to randomise and a lock to keep, and the number of images.
-
-Centre: the image as it forms, with the step preview PB78 reports, then the result;
-Generate turns into Cancel while running, and the status bar says the stage, step n of
-m, the elapsed time and, once one step is done, the time left. A run on a model whose
-verdict is Runs, slower says so before it starts.
-
-Leaving Create, or ten idle minutes, disposes the GenerationClient (PB78), ending its
-host and freeing the model's memory.
-
-Below: a strip of this session's results; clicking one shows it with its prompt and
-settings, and Use these settings copies them back.
-
-The first time Create opens with no generation model, it offers the recommended one for
-this PC with its size and verdict, through the same consent pattern as the faces and
-background cards.
-
 ### §PB81 Running out of memory during generation
 
 `MemoryFailures` already recognises out-of-memory from the ONNX side. The generation

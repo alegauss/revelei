@@ -30,6 +30,24 @@ public static class GenerationModels
     /// <summary>The defaults for a model the catalog does not describe.</summary>
     public static readonly ModelDefaults Fallback = new(8, 1);
 
+    /// <summary>
+    /// The generation model to offer a PC that has none: the first in the catalog that runs well
+    /// here, else the first that runs at all, each in its recommended quantisation (PB72).
+    /// </summary>
+    /// <param name="catalog">The catalog.</param>
+    /// <param name="machine">This PC.</param>
+    /// <returns>The model, its quantisation and verdict, or null when none fits.</returns>
+    public static (ManifestModel Model, string Quantisation, FitVerdict Verdict)? Recommend(ModelManifest catalog, MachineProfile machine)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        (ManifestModel Model, string Quantisation, FitVerdict Verdict)[] fits = [.. catalog.Models
+            .Where(m => m.Kind == ModelKind.Diffusion)
+            .Select(m => (Model: m, Fit: HardwareFit.Recommend(m, machine)))
+            .Where(m => m.Fit is not null)
+            .Select(m => (m.Model, m.Fit!.Value.Quantisation, m.Fit.Value.Verdict))];
+        return fits.Length == 0 ? null : fits.FirstOrDefault(f => f.Verdict.Fit == Fit.RunsWell) is { Model: not null } well ? well : fits[0];
+    }
+
     /// <summary>The installed generation models, by name.</summary>
     /// <param name="root">The folder downloads go to.</param>
     /// <param name="catalog">The catalog.</param>

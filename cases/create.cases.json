@@ -25,8 +25,8 @@
 
   "cases": [
     {
-      "name": "Create generates an image from a prompt with the installed model",
-      "catches": "a Create screen that does not offer the installed model, does not generate, or does not show the result and the seed",
+      "name": "Create generates images from a prompt and keeps them with their settings",
+      "catches": "a Create screen that does not offer the installed model, does not generate, loses an image of the session, or cannot bring its settings back",
       "filed": "PB80",
       "tags": ["create"],
       "fixture": "a window with a staged generation model and the fake engine",
@@ -34,14 +34,24 @@
         { "locator": "Button#DropZoneCreate", "act": "invoke", "named": "Create one is pressed on the empty window" },
         { "locator": "ComboBox#CreateModel", "act": "read", "reads": "picked", "expect": "Z-Image Turbo · q4_k", "named": "the installed model is chosen" },
         { "locator": "Edit#CreateSteps", "act": "read", "reads": "value", "expect": "8", "named": "with the steps a model the catalog does not describe takes" },
+        { "locator": "Edit#CreateNegative", "act": "read", "absent": true, "named": "and no Avoid box, since at guidance 1 it would be ignored" },
         { "locator": "ComboBox#CreateAspect", "act": "read", "reads": "picked", "expect": "Square 1:1 · 1024 × 1024", "named": "square by default" },
         { "locator": "Edit#CreateSeed", "act": "set value", "with": "42", "reads": "value", "expect": "42", "named": "seed 42 is typed" },
         { "locator": "CheckBox#CreateSeedLock", "act": "toggle", "reads": "toggle", "expect": "On", "named": "and kept" },
         { "locator": "Edit#CreatePrompt", "act": "set value", "with": "A red fox in the snow", "reads": "value", "expect": "A red fox in the snow", "named": "a prompt is written" },
+        { "locator": "ComboBox#CreateCount", "act": "pick at", "with": "1", "reads": "picked", "expect": "2", "named": "two images are asked for" },
         { "locator": "Button#CreateGenerate", "act": "invoke", "named": "Generate is pressed" },
-        { "locator": "Text#CreateStatus", "act": "read", "reads": "name", "matches": "^Done in \\d+ s · 1024 × 1024 · seed 42\\.$", "named": "it says it is done, the size and the seed" },
+        { "locator": "Text#CreateStatus", "act": "read", "reads": "name", "matches": "^Done in \\d+ s · 1024 × 1024 · seeds 42 to 43\\.$", "named": "it says it is done, the size and the seeds" },
         { "locator": "Edit#CreateSeed", "act": "read", "reads": "value", "expect": "42", "named": "the kept seed is still there" },
         { "locator": "Button#CreateGenerate", "act": "read", "reads": "name", "expect": "Generate", "named": "and Generate is back" },
+        { "locator": "List#CreateResults > ListItem[order=right]", "act": "read", "reads": "name", "expect": "Seed 43 · 1024 × 1024", "named": "the strip holds both, the second on the right" },
+        { "locator": "List#CreateResults > ListItem[order=left]", "act": "select", "reads": "selected", "expect": "selected", "named": "the first is chosen from the strip" },
+        { "locator": "Text#CreateStatus", "act": "read", "reads": "name", "matches": "· seed 42 · A red fox in the snow$", "named": "it shows with its settings and prompt" },
+        { "locator": "Edit#CreateSeed", "act": "set value", "with": "7", "reads": "value", "expect": "7", "named": "the seed is changed" },
+        { "locator": "Edit#CreatePrompt", "act": "set value", "with": "something else", "reads": "value", "expect": "something else", "named": "and the prompt" },
+        { "locator": "Button#CreateUseSettings", "act": "invoke", "named": "Use these settings is pressed" },
+        { "locator": "Edit#CreateSeed", "act": "read", "reads": "value", "expect": "42", "named": "the image's seed comes back" },
+        { "locator": "Edit#CreatePrompt", "act": "read", "reads": "value", "expect": "A red fox in the snow", "named": "and its prompt" },
         { "locator": "Button#CreateClose", "act": "invoke", "named": "Create is closed" },
         { "locator": "Button#CreateButton", "act": "read", "reads": "name", "expect": "Create", "named": "and the window is back" }
       ]

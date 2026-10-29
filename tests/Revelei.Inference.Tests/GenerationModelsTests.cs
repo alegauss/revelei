@@ -50,6 +50,21 @@ public sealed class GenerationModelsTests : IDisposable
         Assert.Equal((GenerationModels.Fallback, (FitVerdict?)null), (model.Defaults, model.Verdict));
     }
 
+    [Fact]
+    public void APcWithNoModelIsOfferedTheFirstThatRunsWellElseTheFirstThatRuns()
+    {
+        ModelManifest catalog = ModelManifest.Parse(File.ReadAllText(Path.Combine(Repository.Root, "tests", "fixtures", "catalog", "catalog.json")));
+
+        var rtx4060 = GenerationModels.Recommend(catalog, new MachineProfile(8L << 30, 64L << 30, 500L << 30));
+        var cpuOnly = GenerationModels.Recommend(catalog, new MachineProfile(0, 32L << 30, 500L << 30));
+        var tiny = GenerationModels.Recommend(catalog, new MachineProfile(0, 4L << 30, 500L << 30));
+
+        Assert.Equal(("z-image-turbo", "q4_k", Fit.RunsWell), (rtx4060!.Value.Model.Name, rtx4060.Value.Quantisation, rtx4060.Value.Verdict.Fit));
+        Assert.Equal(("z-image-turbo", Fit.CpuOnly), (cpuOnly!.Value.Model.Name, cpuOnly.Value.Verdict.Fit));
+        Assert.Null(tiny);
+        Assert.Null(GenerationModels.Recommend(ModelDownloads.Embedded, new MachineProfile(8L << 30, 64L << 30, 500L << 30)));
+    }
+
     private void Install(string model, string quantisation, params (string Role, string Sha)[] files)
     {
         string folder = Path.Combine(root, model);
