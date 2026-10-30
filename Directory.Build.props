@@ -28,7 +28,7 @@
 
     <!-- The one place the version lives (PB35): the installer reads it back from the published
          exe, and a test holds app.manifest to it. No commit hash appended, so it reads as written. -->
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>

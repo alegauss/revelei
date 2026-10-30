@@ -2,7 +2,7 @@
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
 
   <!-- Directory.Build.props's <Version> with a fourth part; a test holds the two together (PB35). -->
-  <assemblyIdentity version="0.3.0.0" name="Revelei.App" />
+  <assemblyIdentity version="0.4.0.0" name="Revelei.App" />
 
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
