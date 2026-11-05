@@ -12,6 +12,11 @@
 
 ## Block F — Delivery: README, benchmarks and installers
 
+- 📋 **PB86** (deps: —) **Every published release is still PhotoBoost, and the README sends people to a Revelei installer that does not exist** — The next release ships under the new name, so the page, the release and the README finally say the same thing. → §PB86
+- 📋 **PB87** (deps: PB83) **The README and the site describe four photo operations and never say Revelei can create an image from a prompt** — Generation changes what the product is and who it reaches, and the author decided it is part of what Revelei is announced as. → §PB87
+- 📋 **PB88** (deps: —) **A visitor who likes Revelei never learns that Modelado turns a photo into a 3D model the same offline way** — The two apps are one line, AI on your PC with nothing leaving it, and each page should lead to the other. → §PB88
+- 📋 **PB89** (deps: visibility VS58) **Every first download meets a SmartScreen warning, and the Store, where photo apps are looked for, has no Revelei** — The Store signs the MSIX package itself, and claude-tray tests that path first, so this follows what that test learns. → §PB89
+
 ## Block G — Phase 2: denoising
 
 ## Block H — Editor: basic edits and toolbar

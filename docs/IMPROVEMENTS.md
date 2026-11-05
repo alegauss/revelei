@@ -12,6 +12,84 @@
 
 ## Block F — Delivery: README, benchmarks and installers
 
+### §PB86 PB86 — Publishing the next release as Revelei
+
+From the portfolio review of 30/10/2026 (visibility, `produtos/revelei.md`), where the
+author confirmed that the next release ships as Revelei. The main branch was renamed
+after v0.3.0, and `build/installer.iss` already writes `Revelei-Setup-<version>.exe`,
+but every published release is still PhotoBoost: the asset is
+`PhotoBoost-Setup-0.3.0.exe`, and the v0.3.0 notes point at the README of
+`Japode/photo-boost`. The README tells a visitor to download a file that does not exist.
+Anyone arriving from the site or a post meets two names for one product.
+
+The next release (with the 21 commits since v0.3.0) is published as Revelei: the
+installer asset is `Revelei-Setup-<version>.exe` with its `SHA256SUMS`, the notes say
+what Revelei is and link to `alegauss/revelei` and its site, and nothing in them names
+`Japode/photo-boost`. The upgrade over an installed PhotoBoost keeps working (the AppId
+is unchanged and the old shortcuts are removed, as `installer.iss` already does), and
+that is checked once on a machine with v0.3.0 installed. The v0.3.0 notes get one line
+saying the product is now Revelei, with the link.
+
+Done when the latest release's installer is `Revelei-Setup-<version>.exe`, the README's
+download instruction matches it, and an upgrade from PhotoBoost 0.3.0 lands in Revelei.
+
+### §PB87 PB87 — Describing generation in the README and the site
+
+From the portfolio review of 30/10/2026 (visibility, `produtos/revelei.md`), where the
+author decided that generating an image from a prompt is part of what Revelei is
+announced as. Block J put generation in the main branch (Z-Image Turbo, FLUX.2 klein,
+Qwen-Image), yet the README opens on "It does four things" and the site on photo
+restoration; neither says that Revelei can also create an image, which changes what the
+product is and which communities it fits (the r/StableDiffusion reader in particular).
+
+The README's first paragraph and the operations table add generation, with its models,
+their licences and its hardware needs (video memory, RAM offload, the speed this PC
+measures); the site gets a section with a real generated image and the prompt that made
+it. The promise must not run ahead of the release: this lands with the release whose
+installer can generate on a fresh install (PB83), so the text never describes a feature
+the download lacks.
+
+Done when the README and the site describe generation, and a fresh install of the
+release they describe can generate an image after downloading one model.
+
+### §PB88 PB88 — Naming Modelado as the sibling
+
+From the portfolio review of 30/10/2026 (visibility, `estrategia/portfolio.md`). Revelei
+and Modelado form one line, "AI on your PC, nothing leaves it": a better photo, and a
+photo turned into a 3D model, both running locally, both with no account and nothing
+uploaded. Modelado's README already cites its sibling (under the old PhotoBoost name,
+which its own roadmap fixes); Revelei says nothing about Modelado, so a visitor who
+liked one never finds the other.
+
+The README gets a short "From the same author" mention near the end, and the site a card
+in the place other product sites keep for related tools, naming Modelado with its
+one-line promise ("a photo becomes a 3D model you can turn, print and share") and the
+link to alegauss.github.io/modelado. The wording is the same shared line on both
+products, so the pair reads as a family, and the two pages keep a matching design.
+
+Done when the README and the site link to Modelado with the shared line, and Modelado's
+pages link back to Revelei by its current name.
+
+### §PB89 PB89 — Distributing through the Microsoft Store
+
+From the portfolio review of 30/10/2026 (visibility, `estrategia/portfolio.md`). The
+installer is not signed, so SmartScreen warns on the first download, and the people who
+restore family photos look for apps in the Microsoft Store, not on GitHub. The decision
+for all of the author's Windows apps is the Store, which signs the MSIX package itself,
+instead of buying a certificate. claude-tray tests the path first (visibility VS58);
+this line follows what that test learns.
+
+Revelei's own points to check against the Store's rules: models of hundreds of megabytes
+up to 15 GB are downloaded after install, to a folder the person chooses (PB74), which
+an MSIX app must be allowed to write; the generation engine's GPU backend is meant to
+arrive like a model (PB83), and the Store restricts downloading executable code; GFPGAN
+and RMBG-1.4 are licensed for non-commercial use only, which the listing must state; and
+the per-user, no-admin install stays. If one of these rules out MSIX, the outcome is
+written down instead.
+
+Done when Revelei is listed in the Store with its downloads working, or the reason it
+cannot be is recorded here and in the product sheet.
+
 ## Block G — Phase 2: denoising
 
 ## Block H — Editor: basic edits and toolbar
