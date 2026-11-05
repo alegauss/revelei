@@ -1,6 +1,7 @@
 import { SiteButton, SiteFooter, SiteNav, SiteThemeToggle } from "@viglet/viglet-design-system/site";
 import { asset, creditsFor, familyHref, familyName, languages, pageHref, releasesUrl, type Lang } from "../content";
 import { useLang, useWords } from "../i18n";
+import { ConsentSettings } from "./Consent";
 
 // The nav and the footer, drawn by the design system's site layer so Revelei sits in the
 // same family as the other product sites. Everything between them is this product's own.
@@ -60,7 +61,8 @@ export function Footer() {
               </span>
             ))}
             {credits.note}
-          </span>
+          </span>{" "}
+          <ConsentSettings />
         </>
       }
     />

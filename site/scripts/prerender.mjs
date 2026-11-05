@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import { Resvg } from "@resvg/resvg-js";
 import { ogCardSvg, prerenderSite, renderOgCard } from "@viglet/viglet-design-system/vite";
 
-import { render, ROUTES, canonicalUrl, outputDir, OG_IMAGE } from "../dist-server/entry-server.js";
+import { render, ROUTES, canonicalUrl, jsonLd, outputDir, OG_IMAGE } from "../dist-server/entry-server.js";
 
 const siteDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = join(siteDir, "dist");
@@ -46,8 +46,9 @@ const written = prerenderSite({
   log: console.log,
 });
 
-// The language half the shared prerender does not know about: each page's <html lang>, and the
-// hreflang links that tell a search engine the two pages are one page in two languages.
+// The language half the shared prerender does not know about: each page's <html lang>, the
+// hreflang links that tell a search engine the two pages are one page in two languages, and
+// the JSON-LD that says the page is an app's, in that page's language.
 // Replace-or-throw, like the prerender: a template that lost an anchor must fail the build.
 const alternates = [
   ...ROUTES.map((r) => `<link rel="alternate" hreflang="${r.htmlLang}" href="${canonicalUrl(r.path)}" />`),
@@ -59,6 +60,8 @@ for (const route of ROUTES) {
   for (const [from, to] of [
     ['<html lang="en" data-tone="warm">', `<html lang="${route.htmlLang}" data-tone="warm">`],
     ["<!--hreflang-->", alternates],
+    // "<" escaped so no text in it can close the script early
+    ["</head>", `<script type="application/ld+json">${JSON.stringify(jsonLd(route.path)).replace(/</g, "\\u003c")}</script>\n  </head>`],
   ]) {
     if (!html.includes(from)) throw new Error(`${file} lost its ${from} anchor`);
     html = html.replace(from, () => to);

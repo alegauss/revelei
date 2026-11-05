@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { siteThemeScript } from "@viglet/viglet-design-system/site";
 
 // GitHub Pages serves a project site under the repository's name, so the site lives at
-// https://japode.com/revelei/ and every asset path carries the prefix. Written here
+// https://alegauss.github.io/revelei/ and every asset path carries the prefix. Written here
 // and in src/routes.ts, and nowhere else.
 export const BASE = "/revelei/";
 

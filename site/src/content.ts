@@ -178,6 +178,7 @@ type Words = {
   };
   credits: { title: string; labels: string[]; by: string[]; note: string };
   footer: { links: { href: string; label: string }[]; disclaimer: string };
+  consent: { label: string; body: string; decline: string; allow: string; settings: string };
 };
 
 const en: Words = {
@@ -367,6 +368,13 @@ const en: Words = {
     ],
     disclaimer: "Revelei is an Alegauss product. The models' names belong to their authors.",
   },
+  consent: {
+    label: "Analytics consent",
+    body: "This site counts visits with Google Analytics only if you allow it. Nothing is loaded until you choose, and Revelei itself collects nothing either way.",
+    decline: "Decline",
+    allow: "Allow analytics",
+    settings: "Analytics settings",
+  },
 };
 
 const pt: Words = {
@@ -555,6 +563,13 @@ const pt: Words = {
       { href: familyHref, label: "Mais da Alegauss" },
     ],
     disclaimer: "Revelei é um produto Alegauss. Os nomes dos modelos pertencem aos seus autores.",
+  },
+  consent: {
+    label: "Consentimento de análise",
+    body: "Este site só conta visitas com o Google Analytics se você permitir. Nada é carregado até você escolher, e o Revelei em si não coleta nada, em nenhum dos casos.",
+    decline: "Recusar",
+    allow: "Permitir análise",
+    settings: "Configurar análise",
   },
 };
 

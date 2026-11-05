@@ -1085,3 +1085,38 @@ section {
     scroll-behavior: auto;
   }
 }
+
+/* The analytics banner: fixed above the page, never in the prerendered HTML. */
+.consent-settings {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.consent {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  border: 1px solid var(--vg-border);
+  border-radius: var(--vg-radius-panel);
+  background: var(--vg-popover);
+  color: var(--vg-popover-foreground);
+  box-shadow: 0 24px 60px -20px color-mix(in oklab, var(--vg-foreground) 35%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
