@@ -15,7 +15,11 @@
 - 📋 **PB86** (deps: —) **Every published release is still PhotoBoost, and the README sends people to a Revelei installer that does not exist** — The next release ships under the new name, so the page, the release and the README finally say the same thing. → §PB86
 - 📋 **PB87** (deps: PB83) **The README and the site describe four photo operations and never say Revelei can create an image from a prompt** — Generation changes what the product is and who it reaches, and the author decided it is part of what Revelei is announced as. → §PB87
 - 📋 **PB88** (deps: —) **A visitor who likes Revelei never learns that Modelado turns a photo into a 3D model the same offline way** — The two apps are one line, AI on your PC with nothing leaving it, and each page should lead to the other. → §PB88
-- 📋 **PB89** (deps: visibility VS58) **Every first download meets a SmartScreen warning, and the Store, where photo apps are looked for, has no Revelei** — The Store signs the MSIX package itself, and claude-tray tests that path first, so this follows what that test learns. → §PB89
+- 📋 **PB89** (deps: PB90, PB91, PB92, PB93) **Every first download meets a SmartScreen warning, and the Store, where photo apps are looked for, has no Revelei** — claude-tray is already in the Store through the same account, so what is left is the package, the listing and the two policy gaps. → §PB89
+- 📋 **PB90** (deps: —) **No MSIX package exists, so there is nothing to upload to the Store and nothing to install locally to test that path** — claude-tray's build-msix.ps1 already proves the unsigned MSIX route, and the publish folder is the layout as it is. → §PB90
+- 📋 **PB91** (deps: PB90) **A Store release means typing the listing, uploading screenshots and the package by hand in Partner Center** — claude-tray drives the same account through the submission API, so one script can send each release. → §PB91
+- 📋 **PB92** (deps: PB83) **A Store install would download the CUDA engine's native DLLs after certification, code the Store bars apps from fetching** — PB83 plans the vendor backend as a catalog download, which suits the installer and breaks Store policy on dynamic code. → §PB92
+- 📋 **PB93** (deps: —) **Create makes whatever image a prompt asks for, with no filter and no way to report a result, which Store review checks** — Store certification asks apps that generate content with AI for safeguards and a report path, and the age rating depends on them. → §PB93
 
 ## Block G — Phase 2: denoising
 

@@ -77,7 +77,10 @@ installer is not signed, so SmartScreen warns on the first download, and the peo
 restore family photos look for apps in the Microsoft Store, not on GitHub. The decision
 for all of the author's Windows apps is the Store, which signs the MSIX package itself,
 instead of buying a certificate. claude-tray tests the path first (visibility VS58);
-this line follows what that test learns.
+that test passed: Claude Code Tray is published (Store ID 9P27BHWNT56D), and the work
+splits into PB90 (package), PB91 (listing and API), PB92 (GPU backend) and PB93
+(generative AI). Two steps stay with the author in Partner Center: reserving the name,
+and the first submission with its age rating questionnaire.
 
 Revelei's own points to check against the Store's rules: models of hundreds of megabytes
 up to 15 GB are downloaded after install, to a folder the person chooses (PB74), which
@@ -89,6 +92,91 @@ written down instead.
 
 Done when Revelei is listed in the Store with its downloads working, or the reason it
 cannot be is recorded here and in the product sheet.
+
+### §PB90 PB90 — The MSIX package
+
+After claude-tray's `build/build-msix.ps1` and `build/msix/AppxManifest.xml` (T409,
+T416). A `build/msix/AppxManifest.xml` template with `{VERSION}` filled from `<Version>`
+in `Directory.Build.props` as X.Y.Z.0; `Identity Name` and `Publisher` come from the
+Partner Center reservation, which only the author can make (the submission API cannot
+create an app). x64, `MinVersion` 10.0.18362 as the installer has, `runFullTrust`, no
+startup task and no execution alias.
+
+`build/build-msix.cmd` reuses `build-installer.cmd`'s publish (self-contained, natives
+beside the exe, `licenses`, staged FP16 `models`), copies it into
+`artifacts/msix/layout`, draws the package logos (44, 150, StoreLogo, `targetsize` and
+`altform-unplated` variants) from the site mark, runs `makepri` and `makeappx pack` into
+`artifacts/Revelei.msix`, and with `-Register` installs the layout on this machine.
+
+What only the registered package can show, each checked before this ships: Windows ML
+still activates its WinRT types and lists its execution providers inside a package
+(today it is reg-free, unpackaged); writes to `%LOCALAPPDATA%\Revelei` land in the
+package's redirected folder and a chosen models folder outside it still works (PB74);
+the restart after moving models (`MainWindow.Models.cs`, `Restart`) keeps the package
+identity; `Revelei.Generation.Host.exe` starts from the package folder. A test holds the
+manifest version to `Directory.Build.props`.
+
+### §PB91 PB91 — Store listing and submission by API
+
+After claude-tray's `build/store-submit.ps1`, `store-listing-lib.ps1`, `store-shots.ps1`
+and `build/msix/store-listing.md` (T412, T417). Credentials come from `STORE_TENANT_ID`,
+`STORE_CLIENT_ID` and `STORE_CLIENT_SECRET` in the user environment, never from the
+repository; the Entra app already has the Manager role on the Alegauss account (a read
+of `/my/applications` answered on 05/11/2026).
+
+What claude-tray measured and this inherits: the API cannot create the app, so the name
+is reserved in Partner Center by hand; the first submission, with the age rating
+questionnaire, goes through the Partner Center screen; and the API cannot edit or delete
+a pending submission the screen created. From the second release on, `store-submit.ps1
+-Package` sends `artifacts/Revelei.msix`, refusing a version not above the published one
+before uploading, and `-Screenshots` replaces the captures per language.
+
+`store-listing.md` holds the description, features and captions in English and
+Portuguese, the site's two languages, and states that GFPGAN and RMBG-1.4 are licensed
+for non-commercial use only. The screenshots come from the winwright cases' desk, not
+from the author's own.
+
+### §PB92 PB92 — The GPU backend in a Store build
+
+PB83 ships the Vulkan engine (85 MB) with the app and makes the CUDA backend (914 MB
+zipped) a catalog entry of kind `engine`, downloaded like a model. ONNX models are data
+and may be downloaded; a DLL is code, and the Store's policy forbids a product from
+extending its functionality by including code it fetched after certification. The
+installer build keeps PB83's design; the Store build has to differ.
+
+The options, to be measured against the policy text current when this is worked: (1) the
+Store build offers no `engine` entries and runs on the bundled Vulkan backend, the
+Models panel saying the faster backend comes with the GitHub installer; (2) the CUDA
+backend ships as an MSIX optional package of the same publisher, which the Store
+installs and updates itself; (3) it goes in the main package, which costs every Store
+user close to 1 GB whether or not the GPU can use it. Option 1 is the default unless
+option 2 proves workable with an unpackaged native load from the optional package's
+folder.
+
+Done when a Store build cannot download an `engine` entry, a test holds that, and the
+chosen route is recorded with `--decides`.
+
+### §PB93 PB93 — Generative AI safeguards for the Store
+
+The Create screen (PB80) turns any prompt into an image with a local model, and nothing
+stands between the two. The Microsoft Store's policies hold apps that generate content
+with AI to measures against harmful output and to a way for the user to report it, and
+the age rating questionnaire asks about user-directed generated content. The exact
+clauses are to be read from the policy text current when this is worked, not from this
+section.
+
+The likely shape, all on the device since nothing leaves it: a prompt check against a
+blocklist before generation, the generation model's own safety checker where its card
+ships one, and a safety classifier over the produced image that blurs a flagged result
+instead of showing it; a "Report this image" action on the Create screen that opens a
+prefilled issue or e-mail with the prompt and model, never the image unless the person
+attaches it; and the listing and About page saying what the filter does and does not
+catch.
+
+What this must not become: a cloud call, or a filter applied to the photo operations
+(upscale, faces, background, denoise), which edit the person's own photos and generate
+nothing. Done when the checks run in the Create flow, a UI case covers the blocked and
+the reported path, and the listing states the measures.
 
 ## Block G — Phase 2: denoising
 
