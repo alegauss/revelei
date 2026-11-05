@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
     "typecheck": "tsc -b",
     "app-icon": "node scripts/app-icon.mjs",
+    "msix-assets": "node scripts/msix-assets.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

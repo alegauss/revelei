@@ -34,9 +34,16 @@ public partial class App : Application
     /// Up to 0.3.0 the app was PhotoBoost and kept its downloaded models, engine cache and logs
     /// under %LOCALAPPDATA%\PhotoBoost. Moves that folder to the Revelei one once, so an upgrade
     /// does not download every model again. A move that fails leaves both folders as they were.
+    /// Never inside the Store's package (PB90): there the move would carry the installed copy's
+    /// folder into the package's private one, which uninstalling deletes.
     /// </summary>
     private static void MoveLegacyData()
     {
+        if (PackageIdentity.IsPackaged)
+        {
+            return;
+        }
+
         string root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string legacy = Path.Combine(root, "PhotoBoost");
         string current = Path.Combine(root, "Revelei");
