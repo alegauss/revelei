@@ -14,7 +14,7 @@ export const repoUrl = "https://github.com/alegauss/revelei";
 export const asset = (path: string) => `${BASE}${path}`;
 
 // PB49: the Alegauss storefront, at the root of the origin this site is served from, so the
-// link works on a custom domain and on alegauss.github.io alike.
+// link works on alegauss.com and on the old github.io address alike.
 export const familyHref = "/";
 export const familyName = "Alegauss";
 

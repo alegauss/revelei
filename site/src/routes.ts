@@ -4,7 +4,7 @@ import { BASE, languages, releasesUrl, repoUrl, words, type Lang } from "./conte
 // scripts/prerender.mjs reads to set each page's <html lang> and its hreflang links.
 // The Alegauss user site, which GitHub serves this project under since it left Japode; the
 // old japode.com/revelei/ answers 404, so a canonical there sends search engines nowhere.
-export const SITE_ORIGIN = "https://alegauss.github.io";
+export const SITE_ORIGIN = "https://alegauss.com";
 
 // Absolute, because a platform fetching the social card is not on this origin.
 export const OG_IMAGE = `${SITE_ORIGIN}${BASE}og.png`;
